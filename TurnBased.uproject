@@ -1,0 +1,16 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{B4FE6467-4579-3D84-B22A-558A3D607596}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "TurnBasedTutorial",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	]
+}
