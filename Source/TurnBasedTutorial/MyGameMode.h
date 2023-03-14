@@ -3,15 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MyPlayerController.h"
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
 
-/**
- * 
- */
+
+
 UCLASS()
 class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode
 {
 	GENERATED_BODY()
-	
+    
+public:
+	AMyGameMode();
+
+	void BeginPlay() override;
+
+private:
+	void StartGame();
+
+	AMyPlayerController *GetPlayerController();
 };
