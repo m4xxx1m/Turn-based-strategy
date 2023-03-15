@@ -2,44 +2,39 @@
 
 #include "MyGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "Trooper.h"
+
 
 AMyGameMode::AMyGameMode() : Super() {
-	UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
-	PlayerControllerClass = AMyPlayerController::StaticClass();
+    UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
+    GameStateClass = AMyGameState::StaticClass();
+    PlayerControllerClass = AMyPlayerController::StaticClass();
+    DefaultPawnClass = AMyPawn::StaticClass();
+}
+
+AActor *AMyGameMode::ChoosePlayerStart(AController *Player) {
+    InitializeSpawnPointsIfNeeded();
+    return *SpawnPoints.Find(GetNumPlayers());
+}
+
+void AMyGameMode::InitializeSpawnPointsIfNeeded() {
+    if (SpawnPoints.Num() != 0) {
+        return;
+    }
+    for (TActorIterator <AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator) {
+        SpawnPoints[PlayerStartIterator->GetPlayerIndex()] = *PlayerStartIterator;
+    }
 }
 
 void AMyGameMode::BeginPlay() {
-	Super::BeginPlay();
-	ATrooper::InitNumberOfTroopersForId();
-	UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay"));
-	if (GetWorld()->GetMapName().Contains("BattleFieldMap")) {
-		UE_LOG(LogTemp, Warning, TEXT("Player Logined"));
-		StartGame();
-	}
+    Super::BeginPlay();
 }
 
 void AMyGameMode::StartGame() {
-	FVector Location(2000.0f, -1000.0f, 0.0f);
-	FRotator Rotation(0.0f, 180.0f, 0.0f);
-	FActorSpawnParameters SpawnInfo;
-	for (int i = 0; i < 5; ++i) {
-		AActor *spawned = GetWorld()->SpawnActor<ATrooper>(Location, Rotation, SpawnInfo);
-		dynamic_cast<ATrooper*>(spawned)->InitTrooper(Location, true);
-		Location += { 0.f, 500.f, 0.0f };
-	}
-	Location = { -2000.0f, -1000.0f, 0.0f };
-	Rotation = { 0.0f, 0.0f, 0.0f };
-	for (int i = 0; i < 5; ++i) {
-		AActor* spawned = GetWorld()->SpawnActor<ATrooper>(Location, Rotation, SpawnInfo);
-		dynamic_cast<ATrooper*>(spawned)->InitTrooper(Location, false);
-		Location += { 0.f, 500.f, 0.0f };
-	}
-	GetPlayerController()->StartTurn();
+    GetPlayerController()->StartTurn();
 }
 
 AMyPlayerController *AMyGameMode::GetPlayerController() {
-	return dynamic_cast<AMyPlayerController *>(
-		UGameplayStatics::GetPlayerController(GetWorld(), 0)
-	);
+    return dynamic_cast<AMyPlayerController *>(
+            UGameplayStatics::GetPlayerController(GetWorld(), 0)
+    );
 }
