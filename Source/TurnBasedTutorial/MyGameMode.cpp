@@ -11,9 +11,12 @@ AMyGameMode::AMyGameMode() : Super() {
     DefaultPawnClass = AMyPawn::StaticClass();
 }
 
-AActor *AMyGameMode::ChoosePlayerStart(AController *Player) {
+AActor *AMyGameMode::ChoosePlayerStart_Implementation(AController *Player) {
+    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"), GetNumPlayers());
     InitializeSpawnPointsIfNeeded();
-    return *SpawnPoints.Find(GetNumPlayers());
+    auto ptr = *SpawnPoints.Find(GetNumPlayers());
+    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"), ptr->GetPlayerIndex());
+    return ptr;
 }
 
 void AMyGameMode::InitializeSpawnPointsIfNeeded() {
@@ -21,7 +24,8 @@ void AMyGameMode::InitializeSpawnPointsIfNeeded() {
         return;
     }
     for (TActorIterator <AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator) {
-        SpawnPoints[PlayerStartIterator->GetPlayerIndex()] = *PlayerStartIterator;
+        UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"), PlayerStartIterator->GetPlayerIndex());
+        SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
     }
 }
 

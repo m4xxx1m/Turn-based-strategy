@@ -23,7 +23,7 @@ public:
 
 	void BeginPlay() override;
 
-    AActor *ChoosePlayerStart(AController * Player);
+    AActor *ChoosePlayerStart_Implementation(AController * Player);
 private:
 	void StartGame();
 
