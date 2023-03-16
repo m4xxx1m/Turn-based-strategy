@@ -26,22 +26,22 @@ void ATrooper::BeginPlay()
 }
 
 void ATrooper::Tick(float deltaTime) {
-	if (IsMoving) {
-		FVector vector = (MoveToVector - Position);
-		vector.Normalize();
-		vector *= (Speed * deltaTime);
-		if (vector.Size() >= (MoveToVector - Position).Size()) {
-			Position = MoveToVector;
-			IsMoving = false;
-			dynamic_cast<AMyPlayerController*>(
-				UGameplayStatics::GetPlayerController(GetWorld(), 0)
-				)->SetTrooperIsMoving(false);
-		}
-		else {
-			Position += vector;
-		}
-		SetActorLocation(Position);
-	}
+	// if (IsMoving) {
+	// 	FVector vector = (MoveToVector - Position);
+	// 	vector.Normalize();
+	// 	vector *= (Speed * deltaTime);
+	// 	if (vector.Size() >= (MoveToVector - Position).Size()) {
+	// 		Position = MoveToVector;
+	// 		IsMoving = false;
+	// 		dynamic_cast<AMyPlayerController*>(
+	// 			UGameplayStatics::GetPlayerController(GetWorld(), 0)
+	// 			)->SetTrooperIsMoving(false);
+	// 	}
+	// 	else {
+	// 		Position += vector;
+	// 	}
+	// 	SetActorLocation(Position);
+	// }
 }
 
 void ATrooper::MoveTrooper(FVector newPos) {

@@ -4,41 +4,38 @@
 #include "Kismet/GameplayStatics.h"
 
 
-AMyGameMode::AMyGameMode() : Super() {
-    UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
-    GameStateClass = AMyGameState::StaticClass();
-    PlayerControllerClass = AMyPlayerController::StaticClass();
-    DefaultPawnClass = AMyPawn::StaticClass();
+AMyGameMode::AMyGameMode() : Super()
+{
+	UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
+	GameStateClass = AMyGameState::StaticClass();
+	PlayerControllerClass = AMyPlayerController::StaticClass();
+	DefaultPawnClass = AMyPawn::StaticClass();
 }
 
-AActor *AMyGameMode::ChoosePlayerStart_Implementation(AController *Player) {
-    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"), GetNumPlayers());
-    InitializeSpawnPointsIfNeeded();
-    auto ptr = *SpawnPoints.Find(GetNumPlayers());
-    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"), ptr->GetPlayerIndex());
-    return ptr;
+AActor* AMyGameMode::ChoosePlayerStart_Implementation(AController* Player)
+{
+	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"), GetNumPlayers());
+	InitializeSpawnPointsIfNeeded();
+	auto ptr = *SpawnPoints.Find(GetNumPlayers());
+	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"), ptr->GetPlayerIndex());
+	return ptr;
 }
 
-void AMyGameMode::InitializeSpawnPointsIfNeeded() {
-    if (SpawnPoints.Num() != 0) {
-        return;
-    }
-    for (TActorIterator <AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator) {
-        UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"), PlayerStartIterator->GetPlayerIndex());
-        SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
-    }
-}
-
-void AMyGameMode::BeginPlay() {
-    Super::BeginPlay();
-}
-
-void AMyGameMode::StartGame() {
-    GetPlayerController()->StartTurn();
-}
-
-AMyPlayerController *AMyGameMode::GetPlayerController() {
-    return dynamic_cast<AMyPlayerController *>(
-            UGameplayStatics::GetPlayerController(GetWorld(), 0)
-    );
+void AMyGameMode::InitializeSpawnPointsIfNeeded()
+{
+	if (SpawnPoints.Num() != 0)
+	{
+		return;
+	}
+	for (TActorIterator <AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator) {
+	    UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"), PlayerStartIterator->GetPlayerIndex());
+	    SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
+	}
+	// TArray<AActor*> MyPlayerStartObjects;
+	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyPlayerStart::StaticClass(), MyPlayerStartObjects);
+	// for (const auto& PlayerStart : MyPlayerStartObjects)
+	// {
+	// 	SpawnPoints.Add(dynamic_cast<AMyPlayerStart*>(PlayerStart)->GetPlayerIndex(),
+	// 	                dynamic_cast<AMyPlayerStart*>(PlayerStart));
+	// }
 }

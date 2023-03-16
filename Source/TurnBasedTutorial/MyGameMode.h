@@ -12,7 +12,6 @@
 #include "MyGameMode.generated.h"
 
 
-
 UCLASS()
 class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode
 {
@@ -21,15 +20,10 @@ class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode
 public:
 	AMyGameMode();
 
-	void BeginPlay() override;
+	AActor* ChoosePlayerStart_Implementation(AController* Player);
 
-    AActor *ChoosePlayerStart_Implementation(AController * Player);
 private:
-	void StartGame();
+	void InitializeSpawnPointsIfNeeded();
 
-    void InitializeSpawnPointsIfNeeded();
-
-	AMyPlayerController *GetPlayerController();
-
-    TMap<uint8, AMyPlayerStart*> SpawnPoints;
+	TMap<uint8, AMyPlayerStart*> SpawnPoints;
 };

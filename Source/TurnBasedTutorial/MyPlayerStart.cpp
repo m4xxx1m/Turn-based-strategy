@@ -3,8 +3,7 @@
 
 #include "MyPlayerStart.h"
 
-uint8 AMyPlayerStart::GetPlayerIndex() const {
-    return PlayerIndex;
+uint8 AMyPlayerStart::GetPlayerIndex() const
+{
+	return PlayerIndex;
 }
-
-
