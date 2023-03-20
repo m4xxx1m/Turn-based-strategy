@@ -22,8 +22,14 @@ public:
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
+	virtual void BeginPlay() override;
+
 private:
-	void InitializeSpawnPointsIfNeeded(AController *Player);
+	void InitializeSpawnPointsIfNeeded(AController* Player);
+
+	void InitializeBattleField() const;
 
 	TMap<uint8, AMyPlayerStart*> SpawnPoints;
+
+	AMyPlayerController* GetPlayerController() const;
 };

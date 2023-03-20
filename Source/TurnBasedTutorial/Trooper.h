@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -11,25 +10,25 @@ class TURNBASEDTUTORIAL_API ATrooper : public AActor
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this actor's properties
 	ATrooper();
 
 protected:
-	static int NumberOfTroopersForId;
+	static uint8 NumberOfTroopersForId;
 
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float deltaTime) override;
+	virtual void Tick(float const DeltaTime) override;
 
 	UPROPERTY()
 	FVector Position;
 
 	UPROPERTY()
-	bool OnPlayersSide;
+	bool bOnPlayersSide;
 
 	UPROPERTY()
-	int Id;
+	uint8 Id;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UStaticMeshComponent* Mesh;
@@ -37,20 +36,20 @@ protected:
 	UPROPERTY()
 	float Speed = 300.0f;
 
-	bool IsMoving = false;
+	bool bIsMoving = false;
 
 	FVector MoveToVector;
 
 public:
-	void MoveTrooper(FVector newPos);
+	void MoveTrooper(FVector const NewPos);
 
 	static void InitNumberOfTroopersForId();
 
-	FVector GetPosition();
+	FVector GetPosition() const;
 
-	bool IsOnPlayersSide();
+	bool IsOnPlayersSide() const;
 
-	int GetId();
+	uint8 GetId() const;
 
-	void InitTrooper(FVector position, bool onPlayersSide);
+	void InitTrooper(FVector const NewPosition, bool const bIsOnPlayersSide);
 };

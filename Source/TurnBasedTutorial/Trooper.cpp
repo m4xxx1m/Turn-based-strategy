@@ -3,7 +3,8 @@
 #include "MyPlayerController.h"
 
 // Sets default values
-ATrooper::ATrooper() {
+ATrooper::ATrooper()
+{
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add(FName("Trooper"));
 	Id = NumberOfTroopersForId++;
@@ -25,49 +26,59 @@ void ATrooper::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ATrooper::Tick(float deltaTime) {
-	// if (IsMoving) {
-	// 	FVector vector = (MoveToVector - Position);
-	// 	vector.Normalize();
-	// 	vector *= (Speed * deltaTime);
-	// 	if (vector.Size() >= (MoveToVector - Position).Size()) {
-	// 		Position = MoveToVector;
-	// 		IsMoving = false;
-	// 		dynamic_cast<AMyPlayerController*>(
-	// 			UGameplayStatics::GetPlayerController(GetWorld(), 0)
-	// 			)->SetTrooperIsMoving(false);
-	// 	}
-	// 	else {
-	// 		Position += vector;
-	// 	}
-	// 	SetActorLocation(Position);
-	// }
+void ATrooper::Tick(float const DeltaTime)
+{
+	if (bIsMoving)
+	{
+		FVector vector = (MoveToVector - Position);
+		vector.Normalize();
+		vector *= (Speed * DeltaTime);
+		if (vector.Size() >= (MoveToVector - Position).Size())
+		{
+			Position = MoveToVector;
+			bIsMoving = false;
+			dynamic_cast<AMyPlayerController*>(
+				UGameplayStatics::GetPlayerController(GetWorld(), 0)
+			)->SetTrooperIsMoving(false);
+		}
+		else
+		{
+			Position += vector;
+		}
+		SetActorLocation(Position);
+	}
 }
 
-void ATrooper::MoveTrooper(FVector newPos) {
-	MoveToVector = newPos;
-	IsMoving = true;
+void ATrooper::MoveTrooper(FVector const NewPos)
+{
+	MoveToVector = NewPos;
+	bIsMoving = true;
 }
 
-int ATrooper::NumberOfTroopersForId = 0;
+uint8 ATrooper::NumberOfTroopersForId = 0;
 
-void ATrooper::InitNumberOfTroopersForId() {
+void ATrooper::InitNumberOfTroopersForId()
+{
 	NumberOfTroopersForId = 0;
 }
 
-FVector ATrooper::GetPosition() {
+FVector ATrooper::GetPosition() const
+{
 	return Position;
 }
 
-bool ATrooper::IsOnPlayersSide() {
-	return OnPlayersSide;
+bool ATrooper::IsOnPlayersSide() const
+{
+	return bOnPlayersSide;
 }
 
-int ATrooper::GetId() {
+uint8 ATrooper::GetId() const
+{
 	return Id;
 }
 
-void ATrooper::InitTrooper(FVector position, bool onPlayersSide) {
-	Position = position;
-	OnPlayersSide = onPlayersSide;
+void ATrooper::InitTrooper(FVector const NewPosition, bool const bIsOnPlayersSide)
+{
+	Position = NewPosition;
+	bOnPlayersSide = bIsOnPlayersSide;
 }

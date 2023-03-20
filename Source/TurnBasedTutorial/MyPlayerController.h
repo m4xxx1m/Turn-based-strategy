@@ -13,25 +13,24 @@ UCLASS()
 class TURNBASEDTUTORIAL_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 public:
-	// AMyPlayerController();
-	//
-	// void StartTurn();
-	//
-	// void EndTurn();
-	//
-	// virtual void SetupInputComponent() override;
-	//
-	// void SetTrooperIsMoving(bool isMoving);
+	AMyPlayerController();
+
+	void StartTurn();
+
+	void EndTurn();
+
+	virtual void SetupInputComponent() override;
+
+	void SetTrooperIsMoving(bool isMoving);
 
 private:
-	// bool IsMyTurn;
-	//
-	// bool IsThereTrooperMoving = false;
-	//
-	// ATrooper* SelectedTrooper;
-	//
-	// void OnLeftMouseClick();
+	bool IsMyTurn;
 
+	bool IsThereTrooperMoving = false;
+
+	ATrooper* SelectedTrooper;
+
+	void OnLeftMouseClick();
 };
