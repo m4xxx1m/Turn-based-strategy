@@ -15,27 +15,30 @@ AMyGameMode::AMyGameMode() : Super()
 AActor* AMyGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
 	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"), GetNumPlayers());
-	InitializeSpawnPointsIfNeeded();
+	InitializeSpawnPointsIfNeeded(Player);
 	auto ptr = *SpawnPoints.Find(GetNumPlayers());
 	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"), ptr->GetPlayerIndex());
 	return ptr;
 }
 
-void AMyGameMode::InitializeSpawnPointsIfNeeded()
+void AMyGameMode::InitializeSpawnPointsIfNeeded(AController* Player)
 {
 	if (SpawnPoints.Num() != 0)
 	{
 		return;
 	}
-	for (TActorIterator <AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator) {
-	    UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"), PlayerStartIterator->GetPlayerIndex());
-	    SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
+	auto World = GetWorld();
+	for (TActorIterator<AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator)
+	{
+		auto PlayerStart = *PlayerStartIterator;
+		UClass* PawnClass = GetDefaultPawnClassForController(Player);
+		APawn* PawnToFit = PawnClass ? PawnClass->GetDefaultObject<APawn>() : nullptr;
+		FVector ActorLocation = PlayerStart->GetActorLocation();
+		const FRotator ActorRotation = PlayerStart->GetActorRotation();
+		if (!World->EncroachingBlockingGeometry(PawnToFit, ActorLocation, ActorRotation))
+		{
+			SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
+			UE_LOG(LogTemp, Warning, TEXT("PlayerStart unoccupied iterator %d"), PlayerStartIterator->GetPlayerIndex());
+		}
 	}
-	// TArray<AActor*> MyPlayerStartObjects;
-	// UGameplayStatics::GetAllActorsOfClass(GetWorld(), AMyPlayerStart::StaticClass(), MyPlayerStartObjects);
-	// for (const auto& PlayerStart : MyPlayerStartObjects)
-	// {
-	// 	SpawnPoints.Add(dynamic_cast<AMyPlayerStart*>(PlayerStart)->GetPlayerIndex(),
-	// 	                dynamic_cast<AMyPlayerStart*>(PlayerStart));
-	// }
 }

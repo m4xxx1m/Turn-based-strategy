@@ -20,10 +20,10 @@ class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode
 public:
 	AMyGameMode();
 
-	AActor* ChoosePlayerStart_Implementation(AController* Player);
+	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
 private:
-	void InitializeSpawnPointsIfNeeded();
+	void InitializeSpawnPointsIfNeeded(AController *Player);
 
 	TMap<uint8, AMyPlayerStart*> SpawnPoints;
 };
