@@ -9,28 +9,42 @@
 /**
  * 
  */
+
+// DECLARE_DYNAMIC_DELEGATE_OneParam(FOnMyTurnChangedDelegate, bool, bMyTurn);
+
 UCLASS()
 class TURNBASEDTUTORIAL_API AMyPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
 public:
+	// FOnMyTurnChangedDelegate OnMyTurnChanged;
+
 	AMyPlayerController();
 
+	UFUNCTION(Client, Reliable)
 	void StartTurn();
 
+	UFUNCTION(Client, Reliable)
 	void EndTurn();
+
+	UFUNCTION(Server, Reliable)
+	void MoveHero();
 
 	virtual void SetupInputComponent() override;
 
 	void SetTrooperIsMoving(bool isMoving);
 
 private:
-	bool IsMyTurn;
+	bool bIsMyTurn;
 
-	bool IsThereTrooperMoving = false;
+	bool bIsThereTrooperMoving = false;
 
 	ATrooper* SelectedTrooper;
 
 	void OnLeftMouseClick();
+
+	void SetMyTurn(bool bMyTurn);
+
+	auto GetMyGameMode() const;
 };

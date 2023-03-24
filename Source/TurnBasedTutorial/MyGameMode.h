@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "EngineUtils.h"
 #include "MyPlayerController.h"
-#include "MyGameState.h"
-#include "MyPawn.h"
 #include "MyPlayerStart.h"
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
@@ -22,14 +20,31 @@ public:
 
 	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
 
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void CycleTurns();
 
 private:
 	void InitializeSpawnPointsIfNeeded(AController* Player);
 
 	void InitializeBattleField() const;
 
-	TMap<uint8, AMyPlayerStart*> SpawnPoints;
+	TMap<uint8, AMyPlayerStart*> SpawnPoints{};
 
-	AMyPlayerController* GetPlayerController() const;
+	AMyPlayerController* GetMyPlayerController(uint8 const PlayerIndex) const;
+
+	UFUNCTION(BlueprintCallable)
+	void StartGame();
+
+	UFUNCTION(BlueprintPure)
+	AMyPlayerController* PlayerInTurn() const;
+
+	UFUNCTION(BlueprintPure)
+	AMyPlayerController* PlayerNotInTurn() const;
+
+	UPROPERTY()
+	uint8 CurrentPlayerTurn{0};
 };
