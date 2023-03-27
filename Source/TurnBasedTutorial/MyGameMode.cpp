@@ -16,35 +16,37 @@ AMyGameMode::AMyGameMode() : Super()
 void AMyGameMode::BeginPlay()
 {
 	Super::BeginPlay();
-	// ATrooper::InitNumberOfTroopersForId();
-	// UE_LOG(LogTemp, Warning, TEXT("GameMode BeginPlay"));
-	// if (GetWorld()->GetMapName().Contains("BattleFieldMap"))
-	// {
-	// 	UE_LOG(LogTemp, Warning, TEXT("Player Logined"));
-	// 	InitializeBattleField();
-	// 	GetMyPlayerController()->StartTurn();
-	// }
 }
 
 void AMyGameMode::InitializeBattleField() const
 {
-	// FVector Location(2000.0f, -1000.0f, 0.0f);
-	// FRotator Rotation(0.0f, 180.0f, 0.0f);
-	// FActorSpawnParameters const SpawnInfo;
-	// for (int i = 0; i < 5; ++i)
-	// {
-	// 	AActor* Spawned = GetWorld()->SpawnActor<ATrooper>(Location, Rotation, SpawnInfo);
-	// 	dynamic_cast<ATrooper*>(Spawned)->InitTrooper(Location, true);
-	// 	Location += {0.f, 500.f, 0.0f};
-	// }
-	// Location = {-2000.0f, -1000.0f, 0.0f};
-	// Rotation = {0.0f, 0.0f, 0.0f};
-	// for (int i = 0; i < 5; ++i)
-	// {
-	// 	AActor* Spawned = GetWorld()->SpawnActor<ATrooper>(Location, Rotation, SpawnInfo);
-	// 	dynamic_cast<ATrooper*>(Spawned)->InitTrooper(Location, false);
-	// 	Location += {0.f, 500.f, 0.0f};
-	// }
+	UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
+	FVector Location(2000.0f, -1000.0f, 0.0f);
+	FRotator Rotation(0.0f, 180.0f, 0.0f);
+	FActorSpawnParameters const SpawnInfo;
+
+	uint8 TrooperCount = 0;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		FTransform SpawnLocationAndRotation(Rotation);
+		SpawnLocationAndRotation.SetLocation(Location);
+		AActor* Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(ATrooper::StaticClass(), SpawnLocationAndRotation);
+		dynamic_cast<ATrooper*>(Spawned)->Initialize(0, Location, TrooperCount++);
+		Spawned->FinishSpawning(SpawnLocationAndRotation);
+		Location += {0.f, 500.f, 0.0f};
+	}
+	Location = {-2000.0f, -1000.0f, 0.0f};
+	Rotation = {0.0f, 0.0f, 0.0f};
+	for (int i = 0; i < 5; ++i)
+	{
+		FTransform SpawnLocationAndRotation(Rotation);
+		SpawnLocationAndRotation.SetLocation(Location);
+		AActor* Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(ATrooper::StaticClass(), SpawnLocationAndRotation);
+		dynamic_cast<ATrooper*>(Spawned)->Initialize(1, Location, TrooperCount++);
+		Spawned->FinishSpawning(SpawnLocationAndRotation);
+		Location += {0.f, 500.f, 0.0f};
+	}
 }
 
 
@@ -90,6 +92,9 @@ void AMyGameMode::PostLogin(APlayerController* NewPlayer)
 	UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
 	const auto World = GetWorld();
 	const auto CurrentNumberOfPlayers = GetNumPlayers();
+
+	// 0-indexation
+	dynamic_cast<AMyPlayerController*>(NewPlayer)->SetPlayerIndex(CurrentNumberOfPlayers - 1);
 	UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
 	if (CurrentNumberOfPlayers == 2)
 	{
@@ -107,6 +112,7 @@ void AMyGameMode::PostLogin(APlayerController* NewPlayer)
 
 void AMyGameMode::StartGame()
 {
+	InitializeBattleField();
 	PlayerInTurn()->StartTurn();
 }
 

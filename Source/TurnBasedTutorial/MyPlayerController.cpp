@@ -3,6 +3,8 @@
 #include "MyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
+#include "AIController.h"
+#include "Net/UnrealNetwork.h"
 
 AMyPlayerController::AMyPlayerController() : Super(), bIsMyTurn(false), SelectedTrooper(nullptr)
 {
@@ -40,68 +42,93 @@ void AMyPlayerController::EndTurn_Implementation()
 	UE_LOG(LogTemp, Warning, TEXT("Not your turn"));
 }
 
-void AMyPlayerController::SetTrooperIsMoving(bool isMoving)
-{
-	bIsThereTrooperMoving = isMoving;
-}
-
 auto AMyPlayerController::GetMyGameMode() const
 {
 	return dynamic_cast<AMyGameMode*>(UGameplayStatics::GetGameMode(GetWorld()));
 }
 
-void AMyPlayerController::MoveHero_Implementation()
+void AMyPlayerController::MoveTrooper_Implementation(ATrooper* Trooper, FVector Location)
 {
+	Trooper->MoveTrooper(Location);
 	GetMyGameMode()->CycleTurns();
 }
 
 
+void AMyPlayerController::AttackTrooper_Implementation(ATrooper* Attacker, ATrooper* Victim)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red,
+	                                 FString::Printf(
+		                                 TEXT("ATTACK!! %d attacked %d"), Attacker->GetId(), Victim->GetId()));
+	GetMyGameMode()->CycleTurns();
+}
+
+
+void AMyPlayerController::SetPlayerIndex(uint8 NewPlayerIndex)
+{
+	PlayerIndex = NewPlayerIndex;
+}
+
+void AMyPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	DOREPLIFETIME(AMyPlayerController, PlayerIndex);
+}
+
 void AMyPlayerController::OnLeftMouseClick()
 {
-	// if (bIsThereTrooperMoving)
-	// {
-	// 	return;
-	// }
-	// UE_LOG(LogTemp, Warning, TEXT("Mouse clicked"));
-	// FHitResult HitResult;
-	// bool const IsHitResult = GetHitResultUnderCursorByChannel(TraceTypeQuery1, false, HitResult);
-	// if (IsHitResult)
-	// {
-	// 	AActor* Actor = HitResult.Actor.Get();
-	// 	if (Actor->ActorHasTag(FName("Trooper")))
-	// 	{
-	// 		ATrooper* Trooper = dynamic_cast<ATrooper*>(Actor);
-	// 		if (Trooper != nullptr && Trooper != SelectedTrooper)
-	// 		{
-	// 			if (Trooper->IsOnPlayersSide())
-	// 			{
-	// 				UE_LOG(LogTemp, Warning, TEXT("Hitted trooper id: %d, on our side"),
-	// 				       Trooper->GetId());
-	// 				SelectedTrooper = Trooper;
-	// 			}
-	// 			else
-	// 			{
-	// 				UE_LOG(LogTemp, Warning, TEXT("Hitted trooper id: %d, enemy"),
-	// 				       Trooper->GetId());
-	// 				UE_LOG(LogTemp, Warning, TEXT("Trooper #%d hit enemy trooper #%d"),
-	// 				       SelectedTrooper->GetId(), Trooper->GetId());
-	// 			}
-	// 		}
-	// 	}
-	// 	else if (Actor->ActorHasTag(FName("Floor")))
-	// 	{
-	// 		UE_LOG(LogTemp, Warning, TEXT("Hitted floor: %f, %f, %f"), HitResult.Location.X,
-	// 		       HitResult.Location.Y, HitResult.Location.Z);
-	// 		if (SelectedTrooper != nullptr)
-	// 		{
-	// 			SelectedTrooper->MoveTrooper(HitResult.Location);
-	// 			bIsThereTrooperMoving = true;
-	// 		}
-	// 	}
-	// }
 	if (!bIsMyTurn)
 	{
 		return;
 	}
-	MoveHero();
+	UE_LOG(LogTemp, Warning, TEXT("Mouse clicked"));
+	FHitResult HitResult;
+	bool const IsHitResult = GetHitResultUnderCursorByChannel(TraceTypeQuery1, false, HitResult);
+	if (!IsHitResult)
+		return;
+	UE_LOG(LogTemp, Warning, TEXT("Got hit result"));
+	auto const NewlySelectedLocation = HitResult.Location;
+	ATrooper* NewlySelectedTrooper = dynamic_cast<ATrooper*>(HitResult.GetActor());
+
+	if (NewlySelectedTrooper == nullptr || !NewlySelectedTrooper->IsValidLowLevel())
+	{
+		// we selected something that is not a trooper (or trooper in shitty state...)
+		// probably we should move to it if we can...
+
+		UE_LOG(LogTemp, Warning, TEXT("Not a trooper"));
+
+		// if initial trooper is valid...
+		if (SelectedTrooper != nullptr && SelectedTrooper->IsValidLowLevel())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Do move"));
+			// move this mf
+			MoveTrooper(SelectedTrooper, NewlySelectedLocation);
+			// and reset the selection....
+			SelectedTrooper = nullptr;
+		}
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("New Selected Player Index %d"), NewlySelectedTrooper->GetPlayerIndex());
+	// skip re-selection
+	if (SelectedTrooper == NewlySelectedTrooper)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skip reselection"));
+		return;
+	}
+	// we selected valid trooper...
+	if (NewlySelectedTrooper->GetPlayerIndex() == PlayerIndex)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Do reselect"));
+		// our move, selection
+		SelectedTrooper = NewlySelectedTrooper;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Attack or skip..."));
+		// maybe selected trooper had gone crazy...
+		if (SelectedTrooper == nullptr || !SelectedTrooper->IsValidLowLevel())
+			return;
+		UE_LOG(LogTemp, Warning, TEXT("Do attack"));
+		// ATTACK!!! ATTACK!!!!!!
+		AttackTrooper(SelectedTrooper, NewlySelectedTrooper);
+		SelectedTrooper = nullptr;
+	}
 }

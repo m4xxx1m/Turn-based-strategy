@@ -32,6 +32,7 @@ private:
 
 	void InitializeBattleField() const;
 
+	UPROPERTY()
 	TMap<uint8, AMyPlayerStart*> SpawnPoints{};
 
 	AMyPlayerController* GetMyPlayerController(uint8 const PlayerIndex) const;

@@ -29,16 +29,21 @@ public:
 	void EndTurn();
 
 	UFUNCTION(Server, Reliable)
-	void MoveHero();
+	void MoveTrooper(ATrooper *Trooper, FVector Location);
 
+	UFUNCTION(Server, Reliable)
+	void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
+	
 	virtual void SetupInputComponent() override;
 
-	void SetTrooperIsMoving(bool isMoving);
-
+	UFUNCTION()
+	void SetPlayerIndex(uint8 NewPlayerIndex);
+	
 private:
 	bool bIsMyTurn;
-
-	bool bIsThereTrooperMoving = false;
+	
+	UPROPERTY(Replicated)
+	uint8 PlayerIndex;
 
 	ATrooper* SelectedTrooper;
 

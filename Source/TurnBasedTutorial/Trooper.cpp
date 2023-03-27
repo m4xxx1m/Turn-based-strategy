@@ -1,22 +1,23 @@
 #include "Trooper.h"
 #include <Kismet/GameplayStatics.h>
 #include "MyPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values
 ATrooper::ATrooper()
 {
+	bReplicates = true;
+
 	PrimaryActorTick.bCanEverTick = true;
 	Tags.Add(FName("Trooper"));
-	Id = NumberOfTroopersForId++;
-	Position.Set(0, 0, 0);
-	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	RootComponent = Mesh;
+	MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+	RootComponent = MyStaticMesh;
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(TEXT(
 		"StaticMesh'/Game/StarterContent/Props/SM_Chair.SM_Chair'"
 	));
 	if (MeshToUse.Object)
 	{
-		Mesh->SetStaticMesh(MeshToUse.Object);
+		MyStaticMesh->SetStaticMesh(MeshToUse.Object);
 	}
 }
 
@@ -26,50 +27,37 @@ void ATrooper::BeginPlay()
 	Super::BeginPlay();
 }
 
+void ATrooper::Initialize(uint8 const NewPlayerIndex, FVector const SpawnLocation, uint8 const NewId)
+{
+	PlayerIndex = NewPlayerIndex;
+	bIsMoving = false;
+	CurrentLocation = SpawnLocation;
+	Id = NewId;
+}
+
 void ATrooper::Tick(float const DeltaTime)
 {
-	if (bIsMoving)
+	if (!bIsMoving)
+		return;
+	FVector PositionVector = (TargetLocation - CurrentLocation);
+	PositionVector.Normalize();
+	PositionVector *= (Speed * DeltaTime);
+	if (PositionVector.Size() >= (TargetLocation - CurrentLocation).Size())
 	{
-		FVector vector = (MoveToVector - Position);
-		vector.Normalize();
-		vector *= (Speed * DeltaTime);
-		if (vector.Size() >= (MoveToVector - Position).Size())
-		{
-			Position = MoveToVector;
-			bIsMoving = false;
-			dynamic_cast<AMyPlayerController*>(
-				UGameplayStatics::GetPlayerController(GetWorld(), 0)
-			)->SetTrooperIsMoving(false);
-		}
-		else
-		{
-			Position += vector;
-		}
-		SetActorLocation(Position);
+		CurrentLocation = TargetLocation;
+		bIsMoving = false;
 	}
+	else
+	{
+		CurrentLocation += PositionVector;
+	}
+	SetActorLocation(CurrentLocation);
 }
 
 void ATrooper::MoveTrooper(FVector const NewPos)
 {
-	MoveToVector = NewPos;
+	TargetLocation = NewPos;
 	bIsMoving = true;
-}
-
-uint8 ATrooper::NumberOfTroopersForId = 0;
-
-void ATrooper::InitNumberOfTroopersForId()
-{
-	NumberOfTroopersForId = 0;
-}
-
-FVector ATrooper::GetPosition() const
-{
-	return Position;
-}
-
-bool ATrooper::IsOnPlayersSide() const
-{
-	return bOnPlayersSide;
 }
 
 uint8 ATrooper::GetId() const
@@ -77,8 +65,17 @@ uint8 ATrooper::GetId() const
 	return Id;
 }
 
-void ATrooper::InitTrooper(FVector const NewPosition, bool const bIsOnPlayersSide)
+
+void ATrooper::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
-	Position = NewPosition;
-	bOnPlayersSide = bIsOnPlayersSide;
+	DOREPLIFETIME(ATrooper, PlayerIndex);
+	DOREPLIFETIME(ATrooper, CurrentLocation);
+	DOREPLIFETIME(ATrooper, TargetLocation);
+	DOREPLIFETIME(ATrooper, bIsMoving);
+	DOREPLIFETIME(ATrooper, Id);
+}
+
+uint8 ATrooper::GetPlayerIndex() const
+{
+	return PlayerIndex;
 }

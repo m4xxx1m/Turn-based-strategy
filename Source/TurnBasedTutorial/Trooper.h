@@ -3,10 +3,11 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/StaticMeshComponent.h"
+#include "GameFramework/Character.h"
 #include "Trooper.generated.h"
 
 UCLASS()
-class TURNBASEDTUTORIAL_API ATrooper : public AActor
+class TURNBASEDTUTORIAL_API ATrooper : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -14,42 +15,41 @@ public:
 	// Sets default values for this actor's properties
 	ATrooper();
 
-protected:
-	static uint8 NumberOfTroopersForId;
+	void Initialize(uint8 const NewPlayerIndex, FVector const SpawnLocation, uint8 const NewId);
 
+	UFUNCTION()
+	uint8 GetPlayerIndex() const;
+
+	UFUNCTION()
+	void MoveTrooper(FVector const NewPos);
+
+	UFUNCTION()
+	uint8 GetId() const;
+
+protected:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float const DeltaTime) override;
 
-	UPROPERTY()
-	FVector Position;
-
-	UPROPERTY()
-	bool bOnPlayersSide;
-
-	UPROPERTY()
-	uint8 Id;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* Mesh;
+	UStaticMeshComponent* MyStaticMesh;
+
+private:
+	UPROPERTY(Replicated)
+	uint8 PlayerIndex;
+
+	UPROPERTY(Replicated)
+	uint8 Id;
 
 	UPROPERTY()
 	float Speed = 300.0f;
 
+	UPROPERTY(Replicated)
+	FVector CurrentLocation;
+
+	UPROPERTY(Replicated)
+	FVector TargetLocation;
+
+	UPROPERTY(Replicated)
 	bool bIsMoving = false;
-
-	FVector MoveToVector;
-
-public:
-	void MoveTrooper(FVector const NewPos);
-
-	static void InitNumberOfTroopersForId();
-
-	FVector GetPosition() const;
-
-	bool IsOnPlayersSide() const;
-
-	uint8 GetId() const;
-
-	void InitTrooper(FVector const NewPosition, bool const bIsOnPlayersSide);
 };
