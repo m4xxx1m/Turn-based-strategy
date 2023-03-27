@@ -23,7 +23,6 @@ void AMyGameMode::InitializeBattleField() const
 	UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
 	FVector Location(2000.0f, -1000.0f, 0.0f);
 	FRotator Rotation(0.0f, 180.0f, 0.0f);
-	FActorSpawnParameters const SpawnInfo;
 
 	uint8 TrooperCount = 0;
 

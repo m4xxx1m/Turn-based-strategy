@@ -20,6 +20,8 @@ class TURNBASEDTUTORIAL_API AMyPlayerController : public APlayerController
 public:
 	// FOnMyTurnChangedDelegate OnMyTurnChanged;
 
+	virtual void SetupInputComponent() override;
+
 	AMyPlayerController();
 
 	UFUNCTION(Client, Reliable)
@@ -29,19 +31,17 @@ public:
 	void EndTurn();
 
 	UFUNCTION(Server, Reliable)
-	void MoveTrooper(ATrooper *Trooper, FVector Location);
+	void MoveTrooper(ATrooper* Trooper, FVector Location);
 
 	UFUNCTION(Server, Reliable)
-	void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
-	
-	virtual void SetupInputComponent() override;
+	void AttackTrooper(ATrooper* Attacker, ATrooper* Victim);
 
 	UFUNCTION()
 	void SetPlayerIndex(uint8 NewPlayerIndex);
-	
+
 private:
 	bool bIsMyTurn;
-	
+
 	UPROPERTY(Replicated)
 	uint8 PlayerIndex;
 

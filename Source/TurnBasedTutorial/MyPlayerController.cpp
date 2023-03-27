@@ -3,7 +3,6 @@
 #include "MyPlayerController.h"
 #include "Kismet/GameplayStatics.h"
 #include "MyGameMode.h"
-#include "AIController.h"
 #include "Net/UnrealNetwork.h"
 
 AMyPlayerController::AMyPlayerController() : Super(), bIsMyTurn(false), SelectedTrooper(nullptr)
@@ -24,8 +23,8 @@ void AMyPlayerController::SetMyTurn(bool bMyTurn)
 	if (bIsMyTurn)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
-		                                 FString::Printf(
-			                                 TEXT("YOUR TURN!")));
+										 FString::Printf(
+											 TEXT("CURRENT TURN: %d"), PlayerIndex));
 	}
 	// OnMyTurnChanged.ExecuteIfBound(bIsMyTurn);
 }
@@ -33,13 +32,13 @@ void AMyPlayerController::SetMyTurn(bool bMyTurn)
 void AMyPlayerController::StartTurn_Implementation()
 {
 	SetMyTurn(true);
-	UE_LOG(LogTemp, Warning, TEXT("Your turn"));
+	UE_LOG(LogTemp, Warning, TEXT("Your turn, %d"), PlayerIndex);
 }
 
 void AMyPlayerController::EndTurn_Implementation()
 {
 	SetMyTurn(false);
-	UE_LOG(LogTemp, Warning, TEXT("Not your turn"));
+	UE_LOG(LogTemp, Warning, TEXT("Not your turn, %d"), PlayerIndex);
 }
 
 auto AMyPlayerController::GetMyGameMode() const
