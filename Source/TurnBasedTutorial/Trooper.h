@@ -1,55 +1,75 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
-#include "Components/StaticMeshComponent.h"
 #include "GameFramework/Character.h"
 #include "Trooper.generated.h"
 
 UCLASS()
-class TURNBASEDTUTORIAL_API ATrooper : public ACharacter
-{
-	GENERATED_BODY()
+class TURNBASEDTUTORIAL_API ATrooper : public ACharacter {
+    GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
-	ATrooper();
+    // Sets default values for this actor's properties
+    ATrooper();
 
-	void Initialize(uint8 const NewPlayerIndex, FVector const SpawnLocation, uint8 const NewId);
+    void Initialize(uint8 const NewPlayerIndex,
+                    FVector const SpawnLocation,
+                    uint8 const NewId);
 
-	UFUNCTION()
-	uint8 GetPlayerIndex() const;
+    UFUNCTION()
+    uint8 GetPlayerIndex() const;
 
-	UFUNCTION()
-	void MoveTrooper(FVector const NewPos);
+    UFUNCTION()
+    void MoveTrooper(FVector const NewPos);
 
-	UFUNCTION()
-	uint8 GetId() const;
+    UFUNCTION()
+    uint8 GetId() const;
 
 protected:
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	virtual void Tick(float const DeltaTime) override;
+    virtual void Tick(float const DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* MyStaticMesh;
+    // void SetStaticMesh() const;
 
-private:
-	UPROPERTY(Replicated)
-	uint8 PlayerIndex;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    UStaticMeshComponent *MyStaticMesh;
 
-	UPROPERTY(Replicated)
-	uint8 Id;
+    const TCHAR *MeshPath = nullptr;
 
-	UPROPERTY()
-	float Speed = 300.0f;
+    UPROPERTY(Replicated)
+    uint8 PlayerIndex;
 
-	UPROPERTY(Replicated)
-	FVector CurrentLocation;
+    UPROPERTY(Replicated)
+    uint8 Id;
 
-	UPROPERTY(Replicated)
-	FVector TargetLocation;
+    UPROPERTY()
+    float Speed = 300.0f;
 
-	UPROPERTY(Replicated)
-	bool bIsMoving = false;
+    UPROPERTY(Replicated)
+    FVector CurrentLocation;
+
+    UPROPERTY(Replicated)
+    FVector TargetLocation;
+
+    UPROPERTY(Replicated)
+    bool bIsMoving = false;
 };
+
+// UCLASS()
+// class ATrooperWizard : public ATrooper {
+//     GENERATED_BODY()
+//
+// public:
+//     ATrooperWizard();
+//     
+// };
+//
+// UCLASS()
+// class ATrooperSkeletonMelee : public ATrooper {
+//     GENERATED_BODY()
+//
+// public:
+//     ATrooperSkeletonMelee();
+//     
+// };

@@ -5,152 +5,159 @@
 #include "MyPawn.h"
 #include "MyGameState.h"
 
-AMyGameMode::AMyGameMode() : Super()
-{
-	UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
-	GameStateClass = AMyGameState::StaticClass();
-	PlayerControllerClass = AMyPlayerController::StaticClass();
-	DefaultPawnClass = AMyPawn::StaticClass();
+AMyGameMode::AMyGameMode()
+    : Super() {
+    UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
+    GameStateClass = AMyGameState::StaticClass();
+    PlayerControllerClass = AMyPlayerController::StaticClass();
+    DefaultPawnClass = AMyPawn::StaticClass();
 }
 
-void AMyGameMode::BeginPlay()
-{
-	Super::BeginPlay();
+void AMyGameMode::BeginPlay() {
+    Super::BeginPlay();
 }
 
-void AMyGameMode::InitializeBattleField() const
-{
-	UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
-	FVector Location(2000.0f, -1000.0f, 0.0f);
-	FRotator Rotation(0.0f, 180.0f, 0.0f);
+void AMyGameMode::InitializeBattleField() const {
+    UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
+    FVector Location(2000.0f, -1000.0f, 0.0f);
+    FRotator Rotation(0.0f, 180.0f, 0.0f);
 
-	uint8 TrooperCount = 0;
+    uint8 TrooperCount = 0;
 
-	for (int i = 0; i < 5; ++i)
-	{
-		FTransform SpawnLocationAndRotation(Rotation);
-		SpawnLocationAndRotation.SetLocation(Location);
-		AActor* Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(ATrooper::StaticClass(), SpawnLocationAndRotation);
-		dynamic_cast<ATrooper*>(Spawned)->Initialize(0, Location, TrooperCount++);
-		Spawned->FinishSpawning(SpawnLocationAndRotation);
-		Location += {0.f, 500.f, 0.0f};
-	}
-	Location = {-2000.0f, -1000.0f, 0.0f};
-	Rotation = {0.0f, 0.0f, 0.0f};
-	for (int i = 0; i < 5; ++i)
-	{
-		FTransform SpawnLocationAndRotation(Rotation);
-		SpawnLocationAndRotation.SetLocation(Location);
-		AActor* Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(ATrooper::StaticClass(), SpawnLocationAndRotation);
-		dynamic_cast<ATrooper*>(Spawned)->Initialize(1, Location, TrooperCount++);
-		Spawned->FinishSpawning(SpawnLocationAndRotation);
-		Location += {0.f, 500.f, 0.0f};
-	}
+    TArray<const TCHAR *> bpPaths{
+        TEXT(
+            "Blueprint'/Game/Troopers/TrooperSkeletonMelee.TrooperSkeletonMelee_C'"
+        ),
+        TEXT("Blueprint'/Game/Troopers/TrooperWizard.TrooperWizard_C'")
+    };
+    TArray<UClass *> LoadedBpAssets;
+    for (int i = 0; i < bpPaths.Num(); ++i) {
+        TSoftClassPtr<ATrooper> ActorBpClass = TSoftClassPtr<ATrooper>(
+            FSoftObjectPath(bpPaths[i])
+        );
+        LoadedBpAssets.Push(ActorBpClass.LoadSynchronous());
+    }
+    
+    for (int i = 0; i < 5; ++i) {
+        FTransform SpawnLocationAndRotation(Rotation);
+        SpawnLocationAndRotation.SetLocation(Location);
+        AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+            LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+        dynamic_cast<ATrooper *>(Spawned)->Initialize(
+            0, Location, TrooperCount++);
+        Spawned->FinishSpawning(SpawnLocationAndRotation);
+        Spawned->SetActorLocation(Location);
+        Location += {0.f, 500.f, 0.0f};
+    }
+    Location = {-2000.0f, -1000.0f, 0.0f};
+    Rotation = {0.0f, 0.0f, 0.0f};
+    for (int i = 0; i < 5; ++i) {
+        FTransform SpawnLocationAndRotation(Rotation);
+        SpawnLocationAndRotation.SetLocation(Location);
+        AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+            LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+        dynamic_cast<ATrooper *>(Spawned)->Initialize(
+            1, Location, TrooperCount++);
+        Spawned->FinishSpawning(SpawnLocationAndRotation);
+        Spawned->SetActorLocation(Location);
+        Location += {0.f, 500.f, 0.0f};
+    }
 }
 
-
-AActor* AMyGameMode::ChoosePlayerStart_Implementation(AController* Player)
-{
-	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"), GetNumPlayers());
-	InitializeSpawnPointsIfNeeded(Player);
-	const auto CurrentPlayerStart = *SpawnPoints.Find(GetNumPlayers());
-	UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"), CurrentPlayerStart->GetPlayerIndex());
-	return CurrentPlayerStart;
+AActor *AMyGameMode::ChoosePlayerStart_Implementation(AController *Player) {
+    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"),
+           GetNumPlayers());
+    InitializeSpawnPointsIfNeeded(Player);
+    const auto CurrentPlayerStart = *SpawnPoints.Find(GetNumPlayers());
+    UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart end %d"),
+           CurrentPlayerStart->GetPlayerIndex());
+    return CurrentPlayerStart;
 }
 
-void AMyGameMode::InitializeSpawnPointsIfNeeded(AController* Player)
-{
-	UE_LOG(LogTemp, Warning, TEXT("InitializeSpawnPointsIfNeeded"));
-	if (SpawnPoints.Num() != 0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("InitializeSpawnPointsIfNeeded Exit %d"), SpawnPoints.Num());
-		return;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("Rebuilding spawnpoints"));
-	const auto World = GetWorld();
-	for (TActorIterator<AMyPlayerStart> PlayerStartIterator(GetWorld()); PlayerStartIterator; ++PlayerStartIterator)
-	{
-		const auto PlayerStart = *PlayerStartIterator;
-		const UClass* PawnClass = GetDefaultPawnClassForController(Player);
-		const APawn* PawnToFit = PawnClass ? PawnClass->GetDefaultObject<APawn>() : nullptr;
-		const FVector ActorLocation = PlayerStart->GetActorLocation();
-		const FRotator ActorRotation = PlayerStart->GetActorRotation();
-		UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"), PlayerStartIterator->GetPlayerIndex());
-		if (!World->EncroachingBlockingGeometry(PawnToFit, ActorLocation, ActorRotation))
-		{
-			SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(), *PlayerStartIterator);
-			UE_LOG(LogTemp, Warning, TEXT("PlayerStart unoccupied iterator %d"), PlayerStartIterator->GetPlayerIndex());
-		}
-	}
+void AMyGameMode::InitializeSpawnPointsIfNeeded(AController *Player) {
+    UE_LOG(LogTemp, Warning, TEXT("InitializeSpawnPointsIfNeeded"));
+    if (SpawnPoints.Num() != 0) {
+        UE_LOG(LogTemp, Warning, TEXT("InitializeSpawnPointsIfNeeded Exit %d"),
+               SpawnPoints.Num());
+        return;
+    }
+    UE_LOG(LogTemp, Warning, TEXT("Rebuilding spawnpoints"));
+    const auto World = GetWorld();
+    for (TActorIterator<AMyPlayerStart> PlayerStartIterator(GetWorld());
+         PlayerStartIterator; ++PlayerStartIterator) {
+        const auto PlayerStart = *PlayerStartIterator;
+        const UClass *PawnClass = GetDefaultPawnClassForController(Player);
+        const APawn *PawnToFit = PawnClass
+                                     ? PawnClass->GetDefaultObject<APawn>()
+                                     : nullptr;
+        const FVector ActorLocation = PlayerStart->GetActorLocation();
+        const FRotator ActorRotation = PlayerStart->GetActorRotation();
+        UE_LOG(LogTemp, Warning, TEXT("PlayerStart iterator %d"),
+               PlayerStartIterator->GetPlayerIndex());
+        if (!World->EncroachingBlockingGeometry(PawnToFit, ActorLocation,
+                                                ActorRotation)) {
+            SpawnPoints.Add(PlayerStartIterator->GetPlayerIndex(),
+                            *PlayerStartIterator);
+            UE_LOG(LogTemp, Warning, TEXT("PlayerStart unoccupied iterator %d"),
+                   PlayerStartIterator->GetPlayerIndex());
+        }
+    }
 }
 
+void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
+    Super::PostLogin(NewPlayer);
+    UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
+    // const auto World = GetWorld();
+    const auto CurrentNumberOfPlayers = GetNumPlayers();
 
-void AMyGameMode::PostLogin(APlayerController* NewPlayer)
-{
-	Super::PostLogin(NewPlayer);
-	UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
-	const auto World = GetWorld();
-	const auto CurrentNumberOfPlayers = GetNumPlayers();
-
-	// 0-indexation
-	dynamic_cast<AMyPlayerController*>(NewPlayer)->SetPlayerIndex(CurrentNumberOfPlayers - 1);
-	UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
-	if (CurrentNumberOfPlayers == 2)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Game Start"));
-		// start the game
-		StartGame();
-	}
-	else
-	{
-		// delay the game
-		UE_LOG(LogTemp, Warning, TEXT("Game Delay"));
-	}
-}
-
-
-void AMyGameMode::StartGame()
-{
-	InitializeBattleField();
-	PlayerInTurn()->StartTurn();
-}
-
-
-AMyPlayerController* AMyGameMode::PlayerInTurn() const
-{
-	return GetMyPlayerController(CurrentPlayerTurn);
-}
-
-AMyPlayerController* AMyGameMode::PlayerNotInTurn() const
-{
-	uint8 PlayerControllerIndexNotInTurn = 0;
-	if (CurrentPlayerTurn == 0)
-	{
-		PlayerControllerIndexNotInTurn = 1;
-	}
-	else
-	{
-		PlayerControllerIndexNotInTurn = 0;
-	}
-	return GetMyPlayerController(PlayerControllerIndexNotInTurn);
-}
-
-void AMyGameMode::CycleTurns()
-{
-	PlayerInTurn()->EndTurn();
-	if (CurrentPlayerTurn == 0)
-	{
-		CurrentPlayerTurn = 1;
-	}
-	else
-	{
-		CurrentPlayerTurn = 0;
-	}
-	PlayerInTurn()->StartTurn();
+    // 0-indexation
+    dynamic_cast<AMyPlayerController *>(NewPlayer)->SetPlayerIndex(
+        CurrentNumberOfPlayers - 1);
+    UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
+    if (CurrentNumberOfPlayers == 2) {
+        UE_LOG(LogTemp, Warning, TEXT("Game Start"));
+        // start the game
+        StartGame();
+    } else {
+        // delay the game
+        UE_LOG(LogTemp, Warning, TEXT("Game Delay"));
+    }
 }
 
 
-AMyPlayerController* AMyGameMode::GetMyPlayerController(uint8 const PlayerIndex) const
-{
-	return dynamic_cast<AMyPlayerController*>(UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
+void AMyGameMode::StartGame() {
+    InitializeBattleField();
+    PlayerInTurn()->StartTurn();
+}
+
+
+AMyPlayerController *AMyGameMode::PlayerInTurn() const {
+    return GetMyPlayerController(CurrentPlayerTurn);
+}
+
+AMyPlayerController *AMyGameMode::PlayerNotInTurn() const {
+    uint8 PlayerControllerIndexNotInTurn;
+    if (CurrentPlayerTurn == 0) {
+        PlayerControllerIndexNotInTurn = 1;
+    } else {
+        PlayerControllerIndexNotInTurn = 0;
+    }
+    return GetMyPlayerController(PlayerControllerIndexNotInTurn);
+}
+
+void AMyGameMode::CycleTurns() {
+    PlayerInTurn()->EndTurn();
+    if (CurrentPlayerTurn == 0) {
+        CurrentPlayerTurn = 1;
+    } else {
+        CurrentPlayerTurn = 0;
+    }
+    PlayerInTurn()->StartTurn();
+}
+
+
+AMyPlayerController *AMyGameMode::GetMyPlayerController(
+    uint8 const PlayerIndex) const {
+    return dynamic_cast<AMyPlayerController *>(
+        UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
 }

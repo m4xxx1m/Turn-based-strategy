@@ -9,43 +9,42 @@
 #include "GameFramework/GameMode.h"
 #include "MyGameMode.generated.h"
 
-
 UCLASS()
-class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode
-{
-	GENERATED_BODY()
+class TURNBASEDTUTORIAL_API AMyGameMode : public AGameMode {
+    GENERATED_BODY()
 
 public:
-	AMyGameMode();
+    AMyGameMode();
 
-	virtual AActor* ChoosePlayerStart_Implementation(AController* Player) override;
+    virtual AActor *
+    ChoosePlayerStart_Implementation(AController *Player) override;
 
-	virtual void PostLogin(APlayerController* NewPlayer) override;
+    virtual void PostLogin(APlayerController *NewPlayer) override;
 
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable)
-	void CycleTurns();
+    UFUNCTION(BlueprintCallable)
+    void CycleTurns();
 
 private:
-	void InitializeSpawnPointsIfNeeded(AController* Player);
+    void InitializeSpawnPointsIfNeeded(AController *Player);
 
-	void InitializeBattleField() const;
+    void InitializeBattleField() const;
 
-	UPROPERTY()
-	TMap<uint8, AMyPlayerStart*> SpawnPoints{};
+    UPROPERTY()
+    TMap<uint8, AMyPlayerStart *> SpawnPoints{};
 
-	AMyPlayerController* GetMyPlayerController(uint8 const PlayerIndex) const;
+    AMyPlayerController *GetMyPlayerController(uint8 const PlayerIndex) const;
 
-	UFUNCTION(BlueprintCallable)
-	void StartGame();
+    UFUNCTION(BlueprintCallable)
+    void StartGame();
 
-	UFUNCTION(BlueprintPure)
-	AMyPlayerController* PlayerInTurn() const;
+    UFUNCTION(BlueprintPure)
+    AMyPlayerController *PlayerInTurn() const;
 
-	UFUNCTION(BlueprintPure)
-	AMyPlayerController* PlayerNotInTurn() const;
+    UFUNCTION(BlueprintPure)
+    AMyPlayerController *PlayerNotInTurn() const;
 
-	UPROPERTY()
-	uint8 CurrentPlayerTurn{0};
+    UPROPERTY()
+    uint8 CurrentPlayerTurn{0};
 };
