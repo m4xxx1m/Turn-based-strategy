@@ -8,17 +8,21 @@ ATrooper::ATrooper() {
 
     PrimaryActorTick.bCanEverTick = true;
     Tags.Add(FName("Trooper"));
-    MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-    RootComponent = MyStaticMesh;
-    MeshPath = TEXT("StaticMesh'/Game/StarterContent/Props/SM_Chair.SM_Chair'");
-    static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(MeshPath);
-    if (MeshToUse.Object) {
-        MyStaticMesh->SetStaticMesh(MeshToUse.Object);
-    }
+    // MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
+    // RootComponent = MyStaticMesh;
+    // MeshPath = TEXT("StaticMesh'/Game/StarterContent/Props/SM_Chair.SM_Chair'");
+    // static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(MeshPath);
+    // if (MeshToUse.Object) {
+    //     MyStaticMesh->SetStaticMesh(MeshToUse.Object);
+    // }
 }
 
 // void ATrooper::SetStaticMesh() const {
-//     static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(MeshPath);
+//     static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(
+//         TEXT(
+//             "StaticMesh'/Game/CityofBrass_Enemies/Static/Wizard_StaticMesh.Wizard_StaticMesh'"
+//         )
+//     );
 //     if (MeshToUse.Object) {
 //         MyStaticMesh->SetStaticMesh(MeshToUse.Object);
 //     }
@@ -34,23 +38,31 @@ void ATrooper::Initialize(uint8 const NewPlayerIndex,
                           uint8 const NewId) {
     PlayerIndex = NewPlayerIndex;
     bIsMoving = false;
+    AttackPlayedTime = 0.0f;
     CurrentLocation = SpawnLocation;
     Id = NewId;
 }
 
 void ATrooper::Tick(float const DeltaTime) {
-    if (!bIsMoving)
-        return;
-    FVector PositionVector = (TargetLocation - CurrentLocation);
-    PositionVector.Normalize();
-    PositionVector *= (Speed * DeltaTime);
-    if (PositionVector.Size() >= (TargetLocation - CurrentLocation).Size()) {
-        CurrentLocation = TargetLocation;
-        bIsMoving = false;
-    } else {
-        CurrentLocation += PositionVector;
+    if (bIsAttacking) {
+        AttackPlayedTime += DeltaTime;
+        if (AttackPlayedTime >= AttackDuration) {
+            AttackPlayedTime = 0.0f;
+            bIsAttacking = false;
+        }
     }
-    SetActorLocation(CurrentLocation);
+    if (bIsMoving) {
+        FVector PositionVector = (TargetLocation - CurrentLocation);
+        PositionVector.Normalize();
+        PositionVector *= (Speed * DeltaTime);
+        if (PositionVector.Size() >= (TargetLocation - CurrentLocation).Size()) {
+            CurrentLocation = TargetLocation;
+            bIsMoving = false;
+        } else {
+            CurrentLocation += PositionVector;
+        }
+        SetActorLocation(CurrentLocation);
+    }
 }
 
 void ATrooper::MoveTrooper(FVector const NewPos) {
@@ -62,14 +74,16 @@ uint8 ATrooper::GetId() const {
     return Id;
 }
 
-
 void ATrooper::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
+    Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(ATrooper, PlayerIndex);
     DOREPLIFETIME(ATrooper, CurrentLocation);
     DOREPLIFETIME(ATrooper, TargetLocation);
     DOREPLIFETIME(ATrooper, bIsMoving);
     DOREPLIFETIME(ATrooper, Id);
+    DOREPLIFETIME(ATrooper, bIsAttacking);
+    DOREPLIFETIME(ATrooper, AttackPlayedTime);
 }
 
 uint8 ATrooper::GetPlayerIndex() const {
@@ -89,3 +103,29 @@ uint8 ATrooper::GetPlayerIndex() const {
 //         "StaticMesh'/Game/CityofBrass_Enemies/Static/SkeletonMelee_StaticMesh.SkeletonMelee_StaticMesh'");
 //     SetStaticMesh();
 // }
+
+FVector ATrooper::GetLocation() const {
+    return CurrentLocation;
+}
+
+void ATrooper::Attack() {
+    bIsAttacking = true;
+}
+
+float ATrooper::GetAnimationValue() {
+    if (bIsAttacking) {
+        return -100.0f;
+    }
+    if (bIsMoving) {
+        return 100.0f;
+    }
+    return 0.0f;
+}
+
+bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {
+    return (newPos - CurrentLocation).Size() <= MoveRadius;
+}
+
+bool ATrooper::CheckAttackCorrectness(const FVector attackLocation) const {
+    return (attackLocation - CurrentLocation).Size() <= AttackRadius;
+}

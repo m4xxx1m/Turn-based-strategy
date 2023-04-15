@@ -37,12 +37,14 @@ void AMyGameMode::InitializeBattleField() const {
         );
         LoadedBpAssets.Push(ActorBpClass.LoadSynchronous());
     }
-    
+
     for (int i = 0; i < 5; ++i) {
         FTransform SpawnLocationAndRotation(Rotation);
         SpawnLocationAndRotation.SetLocation(Location);
         AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
             LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+        // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+        //     ATrooper::StaticClass(), SpawnLocationAndRotation);
         dynamic_cast<ATrooper *>(Spawned)->Initialize(
             0, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);
@@ -56,6 +58,8 @@ void AMyGameMode::InitializeBattleField() const {
         SpawnLocationAndRotation.SetLocation(Location);
         AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
             LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+        // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+        //     ATrooper::StaticClass(), SpawnLocationAndRotation);
         dynamic_cast<ATrooper *>(Spawned)->Initialize(
             1, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);

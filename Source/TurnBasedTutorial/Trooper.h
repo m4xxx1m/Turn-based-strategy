@@ -25,17 +25,47 @@ public:
     UFUNCTION()
     uint8 GetId() const;
 
+    UFUNCTION()
+    bool CheckMoveCorrectness(const FVector newPos) const;
+
+    UFUNCTION()
+    bool CheckAttackCorrectness(const FVector attackLocation) const;
+
+    UFUNCTION()
+    FVector GetLocation() const;
+
+    UFUNCTION(BlueprintCallable)
+    float GetAnimationValue();
+
+    UFUNCTION()
+    void Attack();
+    
 protected:
+    const float MoveRadius = 1500.f;
+
+    const float AttackRadius = 1000.f;
+
+    UPROPERTY(Replicated)
+    bool bIsAttacking = false;
+
+    UPROPERTY(Replicated)
+    float AttackPlayedTime;
+    
+    const float AttackDuration = 1.16667f;
+
     virtual void BeginPlay() override;
 
     virtual void Tick(float const DeltaTime) override;
 
     // void SetStaticMesh() const;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    UStaticMeshComponent *MyStaticMesh;
+    // UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    // UStaticMeshComponent *MyStaticMesh;
 
-    const TCHAR *MeshPath = nullptr;
+    // UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    // USkeletalMeshComponent *MySkeletalMesh;
+
+    // const TCHAR *MeshPath = nullptr;
 
     UPROPERTY(Replicated)
     uint8 PlayerIndex;
