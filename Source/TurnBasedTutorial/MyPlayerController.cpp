@@ -48,8 +48,7 @@ void AMyPlayerController::MoveTrooper_Implementation(
     if (Trooper->CheckMoveCorrectness(Location)) {
         Trooper->MoveTrooper(Location);
         GetMyGameMode()->CycleTurns();
-    }
-    else {
+    } else {
         GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
                                          FString::Printf(
                                              TEXT("Out of move radius!")));
@@ -92,7 +91,8 @@ void AMyPlayerController::OnLeftMouseClick() {
     UE_LOG(LogTemp, Warning, TEXT("Mouse clicked"));
     FHitResult HitResult;
     bool const IsHitResult = GetHitResultUnderCursorForObjects(
-        TArray<TEnumAsByte<EObjectTypeQuery>>{ObjectTypeQuery1}, false, HitResult);
+        TArray<TEnumAsByte<EObjectTypeQuery>>{ObjectTypeQuery1}, false,
+        HitResult);
     // GetHitResultUnderCursorForObjects();
     // bool const IsHitResult = GetHitResultUnderCursorByChannel(
     // TraceTypeQuery1, false, HitResult);
