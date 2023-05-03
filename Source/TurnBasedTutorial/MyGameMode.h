@@ -23,6 +23,7 @@ public:
 
     virtual void BeginPlay() override;
 
+
     UFUNCTION(BlueprintCallable)
     void CycleTurns();
 
@@ -34,7 +35,8 @@ private:
     UPROPERTY()
     TMap<uint8, AMyPlayerStart *> SpawnPoints{};
 
-    AMyPlayerController *GetMyPlayerController(uint8 const PlayerIndex) const;
+    UPROPERTY()
+    mutable TArray<ATrooper *> Troopers;
 
     UFUNCTION(BlueprintCallable)
     void StartGame();
@@ -47,4 +49,7 @@ private:
 
     UPROPERTY()
     uint8 CurrentPlayerTurn{0};
+
+    UFUNCTION()
+    AMyPlayerController *GetMyPlayerController(uint8 const PlayerIndex) const;
 };

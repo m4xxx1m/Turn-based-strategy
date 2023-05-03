@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Ability.h"
 #include "GameFramework/Character.h"
 #include "Trooper.generated.h"
 
@@ -29,38 +30,92 @@ public:
     bool CheckMoveCorrectness(const FVector newPos) const;
 
     UFUNCTION()
-    bool CheckAttackCorrectness(const FVector attackLocation) const;
+    bool CheckAttackCorrectness(const FVector attackLocation, int abilityIndex) const;
 
     UFUNCTION()
     FVector GetLocation() const;
 
     UFUNCTION(BlueprintCallable)
     float GetAnimationValue();
+    
+    UFUNCTION()
+    void Attack(int abilityIndex);
+    
+    UFUNCTION()
+    float GetActionRadius(int action) const;
 
     UFUNCTION()
-    void Attack();
-    
+    float GetHitPoints() const;
+
+    UFUNCTION()
+    float GetMaxHitPoints() const;
+
+    UFUNCTION()
+    void SetSelection(bool Selected) const;
+
+    UFUNCTION()
+    void HighlightAsEnemy() const;
+
+    UFUNCTION()
+    void ResetActionPoints();
+
+    UFUNCTION()
+    UAbility *GetAbility(int AbilityIndex) const;
+
 protected:
+    UPROPERTY(EditAnywhere)
+    UMaterialInterface *GreenMaterial = nullptr;
+
+    UPROPERTY(EditAnywhere)
+    UMaterialInterface *RedMaterial = nullptr;
+    
+    UPROPERTY(EditAnywhere)
+    UAbility *AttackAbility;
+
+    UPROPERTY(EditAnywhere)
+    UAbility *SpecialAbility;
+    
     const float MoveRadius = 1500.f;
 
-    const float AttackRadius = 1000.f;
+    float AttackRadius = 1000.f;
+    
+    UPROPERTY(EditAnywhere)
+    float Speed = 300.0f;
+
+    UPROPERTY(EditAnywhere)
+    float StartHitPoints = 100.0f;
+
+    UPROPERTY(EditAnywhere)
+    float MoveCost = 0.0667f;
+
+    UPROPERTY(EditAnywhere)
+    float StartActionPoints = 100.0f;
+    
+    UPROPERTY(Replicated)
+    float HitPoints;
+
+    UPROPERTY(Replicated)
+    float ActionPoints;
 
     UPROPERTY(Replicated)
     bool bIsAttacking = false;
 
     UPROPERTY(Replicated)
     float AttackPlayedTime;
-    
+
     const float AttackDuration = 1.16667f;
 
     virtual void BeginPlay() override;
 
     virtual void Tick(float const DeltaTime) override;
 
+    UPROPERTY(VisibleAnywhere, Replicated)
+    class UWidgetComponent *HealthWidgetComponent;
+
     // void SetStaticMesh() const;
 
-    // UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-    // UStaticMeshComponent *MyStaticMesh;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+    UStaticMeshComponent *SelectionStaticMesh;
 
     // UPROPERTY(EditAnywhere, BlueprintReadWrite)
     // USkeletalMeshComponent *MySkeletalMesh;
@@ -72,10 +127,7 @@ protected:
 
     UPROPERTY(Replicated)
     uint8 Id;
-
-    UPROPERTY()
-    float Speed = 300.0f;
-
+    
     UPROPERTY(Replicated)
     FVector CurrentLocation;
 

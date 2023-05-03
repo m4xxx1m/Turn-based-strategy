@@ -17,6 +17,7 @@ void AMyGameMode::BeginPlay() {
     Super::BeginPlay();
 }
 
+
 void AMyGameMode::InitializeBattleField() const {
     UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
     FVector Location(2000.0f, -1000.0f, 0.0f);
@@ -49,6 +50,7 @@ void AMyGameMode::InitializeBattleField() const {
             0, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);
         Spawned->SetActorLocation(Location);
+        Troopers.Add(dynamic_cast<ATrooper *>(Spawned));
         Location += {0.f, 500.f, 0.0f};
     }
     Location = {-2000.0f, -1000.0f, 0.0f};
@@ -64,9 +66,11 @@ void AMyGameMode::InitializeBattleField() const {
             1, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);
         Spawned->SetActorLocation(Location);
+        Troopers.Add(dynamic_cast<ATrooper *>(Spawned));
         Location += {0.f, 500.f, 0.0f};
     }
 }
+
 
 AActor *AMyGameMode::ChoosePlayerStart_Implementation(AController *Player) {
     UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"),
@@ -111,6 +115,7 @@ void AMyGameMode::InitializeSpawnPointsIfNeeded(AController *Player) {
 void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
     Super::PostLogin(NewPlayer);
     UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
+    // PlayerControllers.Add(dynamic_cast<AMyPlayerController *>(NewPlayer));
     // const auto World = GetWorld();
     const auto CurrentNumberOfPlayers = GetNumPlayers();
 
@@ -121,6 +126,9 @@ void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
     if (CurrentNumberOfPlayers == 2) {
         UE_LOG(LogTemp, Warning, TEXT("Game Start"));
         // start the game
+        // dynamic_cast<AMyGameState *>(
+        //             GetWorld()->GetGameState())->StartGame();
+        // InitializeBattleField();
         StartGame();
     } else {
         // delay the game
@@ -131,6 +139,10 @@ void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
 
 void AMyGameMode::StartGame() {
     InitializeBattleField();
+    // PlayerNotInTurn()->SetEnemySelection(Troopers);
+    // PlayerInTurn()->SetEnemySelection(Troopers);
+    // PlayerControllers[0]->SetEnemySelection(Troopers);
+    // PlayerControllers[1]->SetEnemySelection(Troopers);
     PlayerInTurn()->StartTurn();
 }
 
@@ -140,22 +152,31 @@ AMyPlayerController *AMyGameMode::PlayerInTurn() const {
 }
 
 AMyPlayerController *AMyGameMode::PlayerNotInTurn() const {
-    uint8 PlayerControllerIndexNotInTurn;
-    if (CurrentPlayerTurn == 0) {
-        PlayerControllerIndexNotInTurn = 1;
-    } else {
-        PlayerControllerIndexNotInTurn = 0;
-    }
-    return GetMyPlayerController(PlayerControllerIndexNotInTurn);
+    // uint8 PlayerControllerIndexNotInTurn;
+    // if (CurrentPlayerTurn == 0) {
+    //     PlayerControllerIndexNotInTurn = 1;
+    // } else {
+    //     PlayerControllerIndexNotInTurn = 0;
+    // }
+    // return GetMyPlayerController(PlayerControllerIndexNotInTurn);
+    return GetMyPlayerController(!CurrentPlayerTurn);
 }
 
 void AMyGameMode::CycleTurns() {
-    PlayerInTurn()->EndTurn();
-    if (CurrentPlayerTurn == 0) {
-        CurrentPlayerTurn = 1;
-    } else {
-        CurrentPlayerTurn = 0;
+    if (!this)
+        return;
+    // PlayerInTurn()->EndTurn();
+    for (const auto Trooper : Troopers) {
+        if (Trooper != nullptr) {
+            Trooper->ResetActionPoints();
+        }
     }
+    CurrentPlayerTurn = !CurrentPlayerTurn;
+    // if (CurrentPlayerTurn == 0) {
+    //     CurrentPlayerTurn = 1;
+    // } else {
+    //     CurrentPlayerTurn = 0;
+    // }
     PlayerInTurn()->StartTurn();
 }
 

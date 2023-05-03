@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+// #include "MyGameState.h"
 #include "Trooper.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
@@ -22,25 +23,38 @@ public:
     UFUNCTION(Client, Reliable)
     void StartTurn();
 
-    UFUNCTION(Client, Reliable)
+    UFUNCTION(Client, Reliable, BlueprintCallable)
     void EndTurn();
 
     UFUNCTION(Server, Reliable)
     void MoveTrooper(ATrooper *Trooper, FVector Location);
 
+    // UFUNCTION(Server, Reliable)
+    // void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
+
     UFUNCTION(Server, Reliable)
-    void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
+    void Attack(ATrooper *Attacker, FVector Location, int ActionIndex);
 
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
 
+    UFUNCTION(BlueprintCallable)
+    float SetCurrentActionAndReturnRadius(int action);
+
+    UFUNCTION(Client, Reliable)
+    void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
+    
 private:
+    UPROPERTY(Replicated)
     bool bIsMyTurn;
+
+    UPROPERTY(Replicated)
+    int CurrentAction = 0;
 
     UPROPERTY(Replicated)
     uint8 PlayerIndex;
 
-    UPROPERTY()
+    UPROPERTY(Replicated)
     ATrooper *SelectedTrooper;
 
     void OnLeftMouseClick();
@@ -48,4 +62,6 @@ private:
     void SetMyTurn(bool bMyTurn);
 
     auto GetMyGameMode() const;
+
+    // AMyGameState *GetMyGameState() const;
 };

@@ -1,13 +1,42 @@
 #include "Trooper.h"
 #include <Kismet/GameplayStatics.h>
+
+#include "HealthBar.h"
+#include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
-ATrooper::ATrooper() {
+ATrooper::ATrooper()
+    : HitPoints(StartHitPoints), ActionPoints(StartActionPoints) {
     bReplicates = true;
 
     PrimaryActorTick.bCanEverTick = true;
     Tags.Add(FName("Trooper"));
+    AttackAbility = CreateDefaultSubobject<UAbility>("AttackAbility");
+    SpecialAbility = CreateDefaultSubobject<UAbility>("SpecialAbility");
+
+    HealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(
+        "HealthBar");
+    HealthWidgetComponent->AttachToComponent(RootComponent,
+                                             FAttachmentTransformRules::KeepRelativeTransform);
+
+    SelectionStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(
+        "SelectionMesh");
+    static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshToUse(TEXT(
+        "StaticMesh'/Game/StarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
+    SelectionStaticMesh->AttachToComponent(RootComponent,
+                                           FAttachmentTransformRules::KeepRelativeTransform);
+    SelectionStaticMesh->SetRelativeScale3D({1.8, 1.8, 0.01});
+    SelectionStaticMesh->SetVisibility(false);
+
+    if (MeshToUse.Object) {
+        SelectionStaticMesh->SetStaticMesh(MeshToUse.Object);
+        SelectionStaticMesh->SetStaticMesh(MeshToUse.Object);
+    }
+    // SelectionStaticMesh->SetRelativeTransform(FTransform({1000,1000,100}, {0, 0, 0}), false,
+    // nullptr, ETeleportType::TeleportPhysics);
+    // SelectionStaticMesh->
+
     // MyStaticMesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
     // RootComponent = MyStaticMesh;
     // MeshPath = TEXT("StaticMesh'/Game/StarterContent/Props/SM_Chair.SM_Chair'");
@@ -31,6 +60,8 @@ ATrooper::ATrooper() {
 // Called when the game starts or when spawned
 void ATrooper::BeginPlay() {
     Super::BeginPlay();
+    Cast<UHealthBar>(HealthWidgetComponent->GetUserWidgetObject())->
+        SetOwnerTrooper(this);
 }
 
 void ATrooper::Initialize(uint8 const NewPlayerIndex,
@@ -55,7 +86,8 @@ void ATrooper::Tick(float const DeltaTime) {
         FVector PositionVector = (TargetLocation - CurrentLocation);
         PositionVector.Normalize();
         PositionVector *= (Speed * DeltaTime);
-        if (PositionVector.Size() >= (TargetLocation - CurrentLocation).Size()) {
+        if (PositionVector.Size() >= (TargetLocation - CurrentLocation).
+            Size()) {
             CurrentLocation = TargetLocation;
             bIsMoving = false;
         } else {
@@ -68,6 +100,7 @@ void ATrooper::Tick(float const DeltaTime) {
 void ATrooper::MoveTrooper(FVector const NewPos) {
     TargetLocation = NewPos;
     bIsMoving = true;
+    ActionPoints -= (NewPos - CurrentLocation).Size() * MoveCost;
 }
 
 uint8 ATrooper::GetId() const {
@@ -83,6 +116,9 @@ void ATrooper::GetLifetimeReplicatedProps(
     DOREPLIFETIME(ATrooper, bIsMoving);
     DOREPLIFETIME(ATrooper, Id);
     DOREPLIFETIME(ATrooper, bIsAttacking);
+    DOREPLIFETIME(ATrooper, HitPoints);
+    DOREPLIFETIME(ATrooper, ActionPoints);
+    DOREPLIFETIME(ATrooper, HealthWidgetComponent);
     DOREPLIFETIME(ATrooper, AttackPlayedTime);
 }
 
@@ -108,8 +144,52 @@ FVector ATrooper::GetLocation() const {
     return CurrentLocation;
 }
 
-void ATrooper::Attack() {
-    bIsAttacking = true;
+
+float ATrooper::GetActionRadius(int action) const {
+    switch (action) {
+        case 1:
+            return AttackAbility->ActionRadius;
+        case 2:
+            return SpecialAbility->ActionRadius;
+        default:
+            return ActionPoints;
+    }
+}
+
+float ATrooper::GetHitPoints() const {
+    return HitPoints;
+}
+
+float ATrooper::GetMaxHitPoints() const {
+    return StartHitPoints;
+}
+
+void ATrooper::SetSelection(bool Selection) const {
+    if (SelectionStaticMesh) {
+        if (SelectionStaticMesh->GetMaterial(0) != GreenMaterial) {
+            SelectionStaticMesh->SetMaterial(0, GreenMaterial);
+        }
+        SelectionStaticMesh->SetVisibility(Selection);
+    }
+}
+
+void ATrooper::HighlightAsEnemy() const {
+    SelectionStaticMesh->SetVisibility(true);
+}
+
+void ATrooper::ResetActionPoints() {
+    ActionPoints = StartActionPoints;
+}
+
+UAbility *ATrooper::GetAbility(int AbilityIndex) const {
+    switch (AbilityIndex) {
+        case 1:
+            return AttackAbility;
+        case 2:
+            return SpecialAbility;
+        default:
+            return nullptr;
+    }
 }
 
 float ATrooper::GetAnimationValue() {
@@ -122,10 +202,20 @@ float ATrooper::GetAnimationValue() {
     return 0.0f;
 }
 
-bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {
-    return (newPos - CurrentLocation).Size() <= MoveRadius;
+void ATrooper::Attack(int abilityIndex) {
+    bIsAttacking = true;
+    ActionPoints -= GetAbility(abilityIndex)->ActionCost;
 }
 
-bool ATrooper::CheckAttackCorrectness(const FVector attackLocation) const {
-    return (attackLocation - CurrentLocation).Size() <= AttackRadius;
+bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {
+    return (newPos - CurrentLocation).Size() * MoveCost <= ActionPoints;
+    // return (newPos - CurrentLocation).Size() <= MoveRadius;
+}
+
+bool ATrooper::CheckAttackCorrectness(const FVector attackLocation,
+                                      int abilityIndex) const {
+    return (attackLocation - CurrentLocation).Size() <=
+           GetAbility(abilityIndex)->ActionRadius && ActionPoints >=
+           GetAbility(abilityIndex)->ActionCost;
+    // return (attackLocation - CurrentLocation).Size() <= AttackRadius;
 }
