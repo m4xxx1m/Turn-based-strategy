@@ -75,10 +75,6 @@ protected:
     UPROPERTY(EditAnywhere)
     UAbility *SpecialAbility;
     
-    const float MoveRadius = 1500.f;
-
-    float AttackRadius = 1000.f;
-    
     UPROPERTY(EditAnywhere)
     float Speed = 300.0f;
 

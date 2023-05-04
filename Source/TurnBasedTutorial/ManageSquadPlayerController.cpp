@@ -25,8 +25,8 @@ void AManageSquadPlayerController::OnLeftMouseClick() {
 
     UE_LOG(LogTemp, Warning, TEXT("Got hit result"));
     // auto const NewlySelectedLocation = HitResult.Location;
-    AManageSquadTrooper *NewlySelectedTrooper = dynamic_cast
-        <AManageSquadTrooper *>(
+    AManageSquadTrooper *NewlySelectedTrooper = Cast
+        <AManageSquadTrooper>(
             HitResult.GetActor());
 
     if (NewlySelectedTrooper == nullptr || !NewlySelectedTrooper->
@@ -46,11 +46,11 @@ void AManageSquadPlayerController::OnLeftMouseClick() {
             if (SelectedTrooper) {
                 UE_LOG(LogTemp, Warning, TEXT("Trooper replacement"));
                 SelectedTrooper->ChangeSkeletalMesh(NewlySelectedTrooper);
-                dynamic_cast<AManageSquadGameState *>(
+                Cast<AManageSquadGameState>(
                     GetWorld()->GetGameState())->ChangeSquad(
                     SelectedTrooper->GetIndex(),
                     NewlySelectedTrooper->GetIndex()
-                ); 
+                );
             }
             break;
         case ETrooperType::TROOPER_IN_SQUAD:

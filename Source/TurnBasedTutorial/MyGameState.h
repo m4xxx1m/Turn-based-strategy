@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MyPlayerState.h"
 #include "GameFramework/GameState.h"
 #include "MyGameState.generated.h"
 
@@ -12,26 +13,32 @@
 UCLASS()
 class TURNBASEDTUTORIAL_API AMyGameState : public AGameState {
     GENERATED_BODY()
-// public:
-//     UFUNCTION(BlueprintCallable)
-//     void CycleTurns();
-//     
-//     UFUNCTION(BlueprintCallable)
-//     void StartGame();
-//     
-// private:
-//     // void InitializeBattleField() const;
-//
-//     UFUNCTION()
-//     AMyPlayerController *GetMyPlayerController(uint8 const PlayerIndex) const;
-//     
-//
-//     UFUNCTION(BlueprintPure)
-//     AMyPlayerController *PlayerInTurn() const;
-//
-//     UFUNCTION(BlueprintPure)
-//     AMyPlayerController *PlayerNotInTurn() const;
-//
-//     UPROPERTY()
-//     uint8 CurrentPlayerTurn{0};
+
+public:
+    virtual void BeginPlay() override;
+    
+    UFUNCTION()
+    void AddTrooper(ATrooper *Trooper);
+
+    UFUNCTION()
+    void StartGame() const;
+    
+    UFUNCTION(BlueprintCallable, Server, Reliable)
+    void CycleTurns(uint8 CurrentPlayerIndex);
+
+    UFUNCTION(BlueprintPure)
+    AMyPlayerState *PlayerInTurn() const;
+
+    UFUNCTION(BlueprintPure)
+    AMyPlayerState *PlayerNotInTurn() const;
+
+    auto GetMyPlayerState(uint8 PlayerIndex) const;
+
+private:
+    UPROPERTY(Replicated)
+    TArray<ATrooper *> Troopers;
+
+    UPROPERTY(Replicated)
+    uint8 CurrentPlayerTurn{0};
+    
 };

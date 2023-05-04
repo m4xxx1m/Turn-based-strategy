@@ -4,17 +4,24 @@
 #include "Kismet/GameplayStatics.h"
 #include "MyPawn.h"
 #include "MyGameState.h"
+#include "MyPlayerController.h"
+#include "MyPlayerState.h"
 
 AMyGameMode::AMyGameMode()
     : Super() {
     UE_LOG(LogTemp, Warning, TEXT("GameMode Constructor"));
     GameStateClass = AMyGameState::StaticClass();
     PlayerControllerClass = AMyPlayerController::StaticClass();
+    PlayerStateClass = AMyPlayerState::StaticClass();
     DefaultPawnClass = AMyPawn::StaticClass();
 }
 
 void AMyGameMode::BeginPlay() {
     Super::BeginPlay();
+}
+
+auto AMyGameMode::GetMyGameState() const {
+    return GetGameState<AMyGameState>();
 }
 
 
@@ -46,11 +53,11 @@ void AMyGameMode::InitializeBattleField() const {
             LoadedBpAssets[i % 2], SpawnLocationAndRotation);
         // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
         //     ATrooper::StaticClass(), SpawnLocationAndRotation);
-        dynamic_cast<ATrooper *>(Spawned)->Initialize(
+        Cast<ATrooper>(Spawned)->Initialize(
             0, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);
         Spawned->SetActorLocation(Location);
-        Troopers.Add(dynamic_cast<ATrooper *>(Spawned));
+        GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
         Location += {0.f, 500.f, 0.0f};
     }
     Location = {-2000.0f, -1000.0f, 0.0f};
@@ -62,11 +69,11 @@ void AMyGameMode::InitializeBattleField() const {
             LoadedBpAssets[i % 2], SpawnLocationAndRotation);
         // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
         //     ATrooper::StaticClass(), SpawnLocationAndRotation);
-        dynamic_cast<ATrooper *>(Spawned)->Initialize(
+        Cast<ATrooper>(Spawned)->Initialize(
             1, Location, TrooperCount++);
         Spawned->FinishSpawning(SpawnLocationAndRotation);
         Spawned->SetActorLocation(Location);
-        Troopers.Add(dynamic_cast<ATrooper *>(Spawned));
+        GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
         Location += {0.f, 500.f, 0.0f};
     }
 }
@@ -120,7 +127,7 @@ void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
     const auto CurrentNumberOfPlayers = GetNumPlayers();
 
     // 0-indexation
-    dynamic_cast<AMyPlayerController *>(NewPlayer)->SetPlayerIndex(
+    Cast<AMyPlayerController>(NewPlayer)->SetPlayerIndex(
         CurrentNumberOfPlayers - 1);
     UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
     if (CurrentNumberOfPlayers == 2) {
@@ -141,48 +148,49 @@ void AMyGameMode::StartGame() {
     InitializeBattleField();
     // PlayerNotInTurn()->SetEnemySelection(Troopers);
     // PlayerInTurn()->SetEnemySelection(Troopers);
-    // PlayerControllers[0]->SetEnemySelection(Troopers);
-    // PlayerControllers[1]->SetEnemySelection(Troopers);
-    PlayerInTurn()->StartTurn();
+    
+    // PlayerInTurn()->StartTurn();
+    GetMyGameState()->StartGame();
 }
 
 
-AMyPlayerController *AMyGameMode::PlayerInTurn() const {
-    return GetMyPlayerController(CurrentPlayerTurn);
-}
+// AMyPlayerController *AMyGameMode::PlayerInTurn() const {
+//     return GetMyPlayerController(CurrentPlayerTurn);
+// }
 
-AMyPlayerController *AMyGameMode::PlayerNotInTurn() const {
-    // uint8 PlayerControllerIndexNotInTurn;
-    // if (CurrentPlayerTurn == 0) {
-    //     PlayerControllerIndexNotInTurn = 1;
-    // } else {
-    //     PlayerControllerIndexNotInTurn = 0;
-    // }
-    // return GetMyPlayerController(PlayerControllerIndexNotInTurn);
-    return GetMyPlayerController(!CurrentPlayerTurn);
-}
+// AMyPlayerController *AMyGameMode::PlayerNotInTurn() const {
+//     // uint8 PlayerControllerIndexNotInTurn;
+//     // if (CurrentPlayerTurn == 0) {
+//     //     PlayerControllerIndexNotInTurn = 1;
+//     // } else {
+//     //     PlayerControllerIndexNotInTurn = 0;
+//     // }
+//     // return GetMyPlayerController(PlayerControllerIndexNotInTurn);
+//     return GetMyPlayerController(!CurrentPlayerTurn);
+// }
 
-void AMyGameMode::CycleTurns() {
-    if (!this)
-        return;
-    // PlayerInTurn()->EndTurn();
-    for (const auto Trooper : Troopers) {
-        if (Trooper != nullptr) {
-            Trooper->ResetActionPoints();
-        }
-    }
-    CurrentPlayerTurn = !CurrentPlayerTurn;
-    // if (CurrentPlayerTurn == 0) {
-    //     CurrentPlayerTurn = 1;
-    // } else {
-    //     CurrentPlayerTurn = 0;
-    // }
-    PlayerInTurn()->StartTurn();
-}
+// void AMyGameMode::CycleTurns() {
+//     if (!this)
+//         return;
+//     // PlayerInTurn()->EndTurn();
+//     for (const auto Trooper : Troopers) {
+//         if (Trooper != nullptr) {
+//             Trooper->ResetActionPoints();
+//         }
+//     }
+//     CurrentPlayerTurn = !CurrentPlayerTurn;
+//     // if (CurrentPlayerTurn == 0) {
+//     //     CurrentPlayerTurn = 1;
+//     // } else {
+//     //     CurrentPlayerTurn = 0;
+//     // }
+//     PlayerInTurn()->StartTurn();
+// }
 
 
-AMyPlayerController *AMyGameMode::GetMyPlayerController(
-    uint8 const PlayerIndex) const {
-    return dynamic_cast<AMyPlayerController *>(
-        UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
-}
+// AMyPlayerController *AMyGameMode::GetMyPlayerController(
+//     uint8 const PlayerIndex) const {
+//     return Cast<AMyPlayerController>(
+//         UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
+// }
+

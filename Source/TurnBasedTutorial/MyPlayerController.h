@@ -2,7 +2,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-// #include "MyGameState.h"
 #include "Trooper.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
@@ -15,25 +14,25 @@ class TURNBASEDTUTORIAL_API AMyPlayerController : public APlayerController {
 
 public:
     // FOnMyTurnChangedDelegate OnMyTurnChanged;
-
+    
     virtual void SetupInputComponent() override;
 
     AMyPlayerController();
 
-    UFUNCTION(Client, Reliable)
-    void StartTurn();
+    // UFUNCTION(Client, Reliable)
+    // void StartTurn();
 
-    UFUNCTION(Client, Reliable, BlueprintCallable)
-    void EndTurn();
-
-    UFUNCTION(Server, Reliable)
-    void MoveTrooper(ATrooper *Trooper, FVector Location);
-
+    // UFUNCTION(Client, Reliable, BlueprintCallable)
+    // void EndTurn();
+    //
     // UFUNCTION(Server, Reliable)
-    // void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
-
-    UFUNCTION(Server, Reliable)
-    void Attack(ATrooper *Attacker, FVector Location, int ActionIndex);
+    // void MoveTrooper(ATrooper *Trooper, FVector Location);
+    //
+    // // // UFUNCTION(Server, Reliable)
+    // // // void AttackTrooper(ATrooper *Attacker, ATrooper *Victim);
+    //
+    // UFUNCTION(Server, Reliable)
+    // void Attack(ATrooper *Attacker, FVector Location, int ActionIndex);
 
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
@@ -45,23 +44,26 @@ public:
     void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
     
 private:
-    UPROPERTY(Replicated)
-    bool bIsMyTurn;
-
-    UPROPERTY(Replicated)
-    int CurrentAction = 0;
-
+    // UPROPERTY(Replicated)
+    // bool bIsMyTurn;
+    //
+    // UPROPERTY(Replicated)
+    // int CurrentAction = 0;
+    //
     UPROPERTY(Replicated)
     uint8 PlayerIndex;
+    //
+    // UPROPERTY(Replicated)
+    // ATrooper *SelectedTrooper;
 
-    UPROPERTY(Replicated)
-    ATrooper *SelectedTrooper;
-
+    UFUNCTION()
     void OnLeftMouseClick();
 
-    void SetMyTurn(bool bMyTurn);
+    // void SetMyTurn(bool bMyTurn);
 
     auto GetMyGameMode() const;
 
-    // AMyGameState *GetMyGameState() const;
+    auto GetMyGameState() const;
+
+    auto GetMyPlayerState() const;
 };
