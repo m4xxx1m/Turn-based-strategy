@@ -19,6 +19,9 @@ public:
 
     AMyPlayerController();
 
+    UFUNCTION(BlueprintCallable)
+    void EndTurn();
+
     // UFUNCTION(Client, Reliable)
     // void StartTurn();
 
@@ -37,8 +40,8 @@ public:
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
 
-    UFUNCTION(BlueprintCallable)
-    float SetCurrentActionAndReturnRadius(int action);
+    // UFUNCTION(BlueprintCallable)
+    // float SetCurrentActionAndReturnRadius(int action);
 
     UFUNCTION(Client, Reliable)
     void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;

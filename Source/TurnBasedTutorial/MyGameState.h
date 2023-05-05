@@ -24,7 +24,7 @@ public:
     void StartGame() const;
     
     UFUNCTION(BlueprintCallable, Server, Reliable)
-    void CycleTurns(uint8 CurrentPlayerIndex);
+    void CycleTurns();
 
     UFUNCTION(BlueprintPure)
     AMyPlayerState *PlayerInTurn() const;

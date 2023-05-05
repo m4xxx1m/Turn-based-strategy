@@ -30,13 +30,16 @@ public:
     void Attack(ATrooper *Attacker, FVector Location, int ActionIndex);
 
     UFUNCTION()
+    void CycleTurns() const;
+
+    UFUNCTION(BlueprintCallable)
     bool IsMyTurn() const;
 
     UFUNCTION()
     void OnPlayerAction(const FHitResult &HitResult);
 
-    UFUNCTION(BlueprintCallable)
-    float SetCurrentActionAndReturnRadius(int Action);
+    UFUNCTION(BlueprintCallable, Client, Reliable)
+    void SetCurrentAction(int Action);
     
     UFUNCTION(BlueprintCallable)
     uint8 GetPlayerIndex();
@@ -56,8 +59,7 @@ private:
 
     UPROPERTY(Replicated)
     int CurrentAction = 0;
-
-
+    
     UPROPERTY(Replicated)
     ATrooper *SelectedTrooper;
 };

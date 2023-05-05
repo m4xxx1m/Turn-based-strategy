@@ -24,17 +24,15 @@ void AMyGameState::StartGame() const {
     PlayerInTurn()->StartTurn();
 }
 
-void AMyGameState::CycleTurns_Implementation(uint8 CurrentPlayerIndex) {
-    if (CurrentPlayerTurn == CurrentPlayerIndex) {
-        PlayerInTurn()->EndTurn();
-        for (const auto Trooper : Troopers) {
-            if (Trooper != nullptr) {
-                Trooper->ResetActionPoints();
-            }
+void AMyGameState::CycleTurns_Implementation() {
+    PlayerInTurn()->EndTurn();
+    for (const auto Trooper : Troopers) {
+        if (Trooper != nullptr) {
+            Trooper->ResetActionPoints();
         }
-        CurrentPlayerTurn = !CurrentPlayerTurn;
-        PlayerInTurn()->StartTurn();
     }
+    CurrentPlayerTurn = !CurrentPlayerTurn;
+    PlayerInTurn()->StartTurn();
 }
 
 // void AMyGameState::CycleTurns(uint8 CurrentPlayerIndex) {

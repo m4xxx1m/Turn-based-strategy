@@ -50,6 +50,13 @@ auto AMyPlayerController::GetMyGameMode() const {
 }
 
 
+void AMyPlayerController::EndTurn() {
+    // if (GetMyPlayerState()->IsMyTurn()) {
+    //     GetMyGameState()->CycleTurns();
+    // }
+    GetMyPlayerState()->CycleTurns();
+}
+
 // void AMyPlayerController::EndTurn_Implementation() {
 //     GetMyPlayerState()->EndTurn();
 // }
@@ -125,17 +132,17 @@ void AMyPlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
     // GetMyPlayerState()->PlayerIndex = NewPlayerIndex;
 }
 
-float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {
-    return GetMyPlayerState()->SetCurrentActionAndReturnRadius(action);
-
-    // CurrentAction = action;
-    // UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
-    //            "with index %d"), CurrentAction, PlayerIndex);
-    // if (SelectedTrooper) {
-    //     return SelectedTrooper->GetActionRadius(CurrentAction);
-    // }
-    // return 0.0f;
-}
+// float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {
+//     return GetMyPlayerState()->SetCurrentActionAndReturnRadius(action);
+//
+//     // CurrentAction = action;
+//     // UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
+//     //            "with index %d"), CurrentAction, PlayerIndex);
+//     // if (SelectedTrooper) {
+//     //     return SelectedTrooper->GetActionRadius(CurrentAction);
+//     // }
+//     // return 0.0f;
+// }
 
 
 void AMyPlayerController::SetEnemySelection_Implementation(

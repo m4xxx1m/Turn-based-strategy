@@ -214,7 +214,8 @@ bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {
 
 bool ATrooper::CheckAttackCorrectness(const FVector attackLocation,
                                       int abilityIndex) const {
-    return (attackLocation - CurrentLocation).Size() <=
+    return GetAbility(abilityIndex) != nullptr && (
+               attackLocation - CurrentLocation).Size() <=
            GetAbility(abilityIndex)->ActionRadius && ActionPoints >=
            GetAbility(abilityIndex)->ActionCost;
     // return (attackLocation - CurrentLocation).Size() <= AttackRadius;

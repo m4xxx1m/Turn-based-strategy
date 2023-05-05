@@ -19,6 +19,37 @@ void AMyPlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
 
+void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
+                                                FVector Location) {
+    if (Trooper->CheckMoveCorrectness(Location)) {
+        Trooper->MoveTrooper(Location);
+        // GetMyGameMode()->CycleTurns();
+    } else {
+        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                                         FString::Printf(
+                                             TEXT("Out of move radius!")));
+    }
+}
+
+void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
+                                           FVector Location,
+                                           int ActionIndex) {
+    if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
+        Attacker->Attack(ActionIndex);
+    } else {
+        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+                                         FString::Printf(
+                                             TEXT(
+                                                 "Out of radius or not enough Action Points!")));
+    }
+}
+
+void AMyPlayerState::CycleTurns() const {
+    if (bIsMyTurn) {
+        Cast<AMyGameState>(GetWorld()->GetGameState())->CycleTurns();
+    }
+}
+
 bool AMyPlayerState::IsMyTurn() const {
     return bIsMyTurn;
 }
@@ -53,30 +84,6 @@ void AMyPlayerState::EndTurn_Implementation() {
     }
 }
 
-void AMyPlayerState::MoveTrooper_Implementation(
-    ATrooper *Trooper,
-    FVector Location) {
-    if (Trooper->CheckMoveCorrectness(Location)) {
-        Trooper->MoveTrooper(Location);
-        // GetMyGameMode()->CycleTurns();
-    } else {
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
-                                         FString::Printf(
-                                             TEXT("Out of move radius!")));
-    }
-}
-
-void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
-                                           FVector Location,
-                                           int ActionIndex) {
-    if (Attacker && CurrentAction >= 1 && CurrentAction <= 2 &&
-        Attacker->CheckAttackCorrectness(Location, CurrentAction)) {
-        Attacker->Attack(CurrentAction);
-    } else {
-        UE_LOG(LogTemp, Warning,
-               TEXT("Out of radius or not enough Action Points"));
-    }
-}
 
 void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
     auto const NewlySelectedLocation = HitResult.Location;
@@ -125,15 +132,12 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
     }
 }
 
-float AMyPlayerState::SetCurrentActionAndReturnRadius(int Action) {
+void AMyPlayerState::SetCurrentAction_Implementation(int Action) {
     CurrentAction = Action;
     UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
                "with index %d"), CurrentAction, PlayerIndex);
-    if (SelectedTrooper) {
-        return SelectedTrooper->GetActionRadius(CurrentAction);
-    }
-    return 0.0f;
 }
+
 
 uint8 AMyPlayerState::GetPlayerIndex() {
     return PlayerIndex;
