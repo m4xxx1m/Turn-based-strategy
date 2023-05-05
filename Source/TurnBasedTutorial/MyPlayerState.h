@@ -47,6 +47,9 @@ public:
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
 
+    UFUNCTION(Client, Reliable)
+    void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
+
 private:
     UPROPERTY(Replicated)
     uint8 PlayerIndex;

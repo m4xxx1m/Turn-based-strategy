@@ -18,11 +18,17 @@ void AMyGameState::AddTrooper(ATrooper *Trooper) {
     Troopers.Add(Trooper);
 }
 
-void AMyGameState::StartGame() const {
-    // PlayerNotInTurn()->SetEnemySelection(Troopers);
-    // PlayerInTurn()->SetEnemySelection(Troopers);
+void AMyGameState::StartGame_Implementation() const {
+    PlayerNotInTurn()->SetEnemySelection(Troopers);
+    PlayerInTurn()->SetEnemySelection(Troopers);
     PlayerInTurn()->StartTurn();
 }
+
+// void AMyGameState::StartGame() const {
+//     PlayerNotInTurn()->SetEnemySelection(Troopers);
+//     PlayerInTurn()->SetEnemySelection(Troopers);
+//     PlayerInTurn()->StartTurn();
+// }
 
 void AMyGameState::CycleTurns_Implementation() {
     PlayerInTurn()->EndTurn();

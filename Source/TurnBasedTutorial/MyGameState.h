@@ -20,7 +20,7 @@ public:
     UFUNCTION()
     void AddTrooper(ATrooper *Trooper);
 
-    UFUNCTION()
+    UFUNCTION(Server, Reliable)
     void StartGame() const;
     
     UFUNCTION(BlueprintCallable, Server, Reliable)

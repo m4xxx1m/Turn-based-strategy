@@ -145,14 +145,14 @@ void AMyPlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
 // }
 
 
-void AMyPlayerController::SetEnemySelection_Implementation(
-    const TArray<ATrooper *> &Troopers) const {
-    for (const auto Trooper : Troopers) {
-        if (Trooper != nullptr && Trooper->GetPlayerIndex() != PlayerIndex) {
-            Trooper->HighlightAsEnemy();
-        }
-    }
-}
+// void AMyPlayerController::SetEnemySelection_Implementation(
+//     const TArray<ATrooper *> &Troopers) const {
+//     for (const auto Trooper : Troopers) {
+//         if (Trooper != nullptr && Trooper->GetPlayerIndex() != PlayerIndex) {
+//             Trooper->HighlightAsEnemy();
+//         }
+//     }
+// }
 
 
 // void AMyPlayerController::SetEnemySelection_Implementation() {

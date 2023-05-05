@@ -51,9 +51,12 @@ public:
     float GetMaxHitPoints() const;
 
     UFUNCTION()
-    void SetSelection(bool Selected) const;
+    void SetSelection(bool Selected, uint8 ActionType) const;
 
     UFUNCTION()
+    void UpdateSelectionRadius(uint8 ActionType) const;
+
+    UFUNCTION(Client, Reliable)
     void HighlightAsEnemy() const;
 
     UFUNCTION()
@@ -63,6 +66,8 @@ public:
     UAbility *GetAbility(int AbilityIndex) const;
 
 protected:
+    constexpr static float PIXELS_IN_RADIUS = 50;
+    
     UPROPERTY(EditAnywhere)
     UMaterialInterface *GreenMaterial = nullptr;
 
@@ -118,9 +123,12 @@ protected:
 
     // const TCHAR *MeshPath = nullptr;
 
-    UPROPERTY(Replicated)
-    uint8 PlayerIndex;
-
+    // UFUNCTION()
+    // void OnRepNotify_PlayerIndex();
+    
+    UPROPERTY(Replicated/*Using = OnRepNotify_PlayerIndex*/)
+    uint8 PlayerIndex = -1;
+    
     UPROPERTY(Replicated)
     uint8 Id;
     

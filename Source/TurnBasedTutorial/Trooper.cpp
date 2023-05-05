@@ -2,6 +2,7 @@
 #include <Kismet/GameplayStatics.h>
 
 #include "HealthBar.h"
+#include "MyPlayerState.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -26,7 +27,7 @@ ATrooper::ATrooper()
         "StaticMesh'/Game/StarterContent/Shapes/Shape_Cylinder.Shape_Cylinder'"));
     SelectionStaticMesh->AttachToComponent(RootComponent,
                                            FAttachmentTransformRules::KeepRelativeTransform);
-    SelectionStaticMesh->SetRelativeScale3D({1.8, 1.8, 0.01});
+    SelectionStaticMesh->SetWorldScale3D({2.0f, 2.0f, 0.01f});
     SelectionStaticMesh->SetVisibility(false);
 
     if (MeshToUse.Object) {
@@ -97,6 +98,18 @@ void ATrooper::Tick(float const DeltaTime) {
     }
 }
 
+// void ATrooper::OnRepNotify_PlayerIndex() {
+//     UE_LOG(LogTemp, Warning,
+//            TEXT("On rep notify, index: %d, id: %d, on server: %d, player state: %d"),
+//            PlayerIndex, Id, GetNetMode() == NM_DedicatedServer, GetPlayerState() != nullptr);
+//     // if (GetNetMode() != NM_DedicatedServer && GetPlayerState()) {
+//     //     if (Cast<AMyPlayerState>(GetPlayerState())->GetPlayerIndex() !=
+//     //         PlayerIndex) {
+//     //         HighlightAsEnemy();
+//     //     }
+//     // }
+// }
+
 void ATrooper::MoveTrooper(FVector const NewPos) {
     TargetLocation = NewPos;
     bIsMoving = true;
@@ -144,15 +157,18 @@ FVector ATrooper::GetLocation() const {
     return CurrentLocation;
 }
 
-
 float ATrooper::GetActionRadius(int action) const {
     switch (action) {
         case 1:
-            return AttackAbility->ActionRadius;
+            return AttackAbility->ActionCost <= ActionPoints
+                       ? AttackAbility->ActionRadius
+                       : 0;
         case 2:
-            return SpecialAbility->ActionRadius;
+            return SpecialAbility->ActionCost <= ActionPoints
+                       ? SpecialAbility->ActionRadius
+                       : 0;
         default:
-            return ActionPoints;
+            return ActionPoints / MoveCost;
     }
 }
 
@@ -164,16 +180,29 @@ float ATrooper::GetMaxHitPoints() const {
     return StartHitPoints;
 }
 
-void ATrooper::SetSelection(bool Selection) const {
+void ATrooper::SetSelection(bool Selection, uint8 ActionType) const {
     if (SelectionStaticMesh) {
         if (SelectionStaticMesh->GetMaterial(0) != GreenMaterial) {
             SelectionStaticMesh->SetMaterial(0, GreenMaterial);
+            SelectionStaticMesh->SetRelativeLocation({0, 0, 1});
+        }
+        if (Selection) {
+            UpdateSelectionRadius(ActionType);
+        } else {
+            SelectionStaticMesh->SetWorldScale3D({2.f, 2.f, 0.01f});
         }
         SelectionStaticMesh->SetVisibility(Selection);
     }
 }
 
-void ATrooper::HighlightAsEnemy() const {
+void ATrooper::UpdateSelectionRadius(uint8 ActionType) const {
+    const float radiusScale =
+        GetActionRadius(ActionType) / PIXELS_IN_RADIUS;
+    SelectionStaticMesh->SetWorldScale3D(
+        {radiusScale, radiusScale, 0.01f});
+}
+
+void ATrooper::HighlightAsEnemy_Implementation() const {
     SelectionStaticMesh->SetVisibility(true);
 }
 
@@ -215,8 +244,7 @@ bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {
 bool ATrooper::CheckAttackCorrectness(const FVector attackLocation,
                                       int abilityIndex) const {
     return GetAbility(abilityIndex) != nullptr && (
-               attackLocation - CurrentLocation).Size() <=
-           GetAbility(abilityIndex)->ActionRadius && ActionPoints >=
-           GetAbility(abilityIndex)->ActionCost;
+               attackLocation - CurrentLocation).Size() < GetActionRadius(
+               abilityIndex);
     // return (attackLocation - CurrentLocation).Size() <= AttackRadius;
 }

@@ -19,6 +19,15 @@ void AMyPlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
 
+void AMyPlayerState::SetEnemySelection_Implementation(
+    const TArray<ATrooper *> &Troopers) const {
+    for (const auto Trooper : Troopers) {
+        if (Trooper != nullptr && Trooper->GetPlayerIndex() != PlayerIndex) {
+            Trooper->HighlightAsEnemy();
+        }
+    }
+}
+
 void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
                                                 FVector Location) {
     if (Trooper->CheckMoveCorrectness(Location)) {
@@ -74,7 +83,7 @@ void AMyPlayerState::EndTurn_Implementation() {
         UE_LOG(LogTemp, Warning, TEXT("End Turn from player %d"), PlayerIndex);
         SetMyTurn(false);
         if (SelectedTrooper) {
-            SelectedTrooper->SetSelection(false);
+            SelectedTrooper->SetSelection(false, CurrentAction);
             SelectedTrooper = nullptr;
         }
         UE_LOG(LogTemp, Warning, TEXT("Not your turn, %d"), PlayerIndex);
@@ -106,7 +115,7 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
                 // move this mf
                     MoveTrooper(SelectedTrooper, NewlySelectedLocation);
                 // and reset the selection....
-                    SelectedTrooper->SetSelection(false);
+                    SelectedTrooper->SetSelection(false, CurrentAction);
                     SelectedTrooper = nullptr;
                     break;
                 default:
@@ -114,7 +123,7 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
                     UE_LOG(LogTemp, Warning, TEXT("Do attack"));
                     Attack(SelectedTrooper, NewlySelectedLocation,
                            CurrentAction);
-                    SelectedTrooper->SetSelection(false);
+                    SelectedTrooper->SetSelection(false, CurrentAction);
                     SelectedTrooper = nullptr;
                     break;
             }
@@ -125,15 +134,18 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
         UE_LOG(LogTemp, Warning, TEXT("Do reselect"));
         // our move, selection
         if (SelectedTrooper) {
-            SelectedTrooper->SetSelection(false);
+            SelectedTrooper->SetSelection(false, CurrentAction);
         }
         SelectedTrooper = NewlySelectedTrooper;
-        SelectedTrooper->SetSelection(true);
+        SelectedTrooper->SetSelection(true, CurrentAction);
     }
 }
 
 void AMyPlayerState::SetCurrentAction_Implementation(int Action) {
     CurrentAction = Action;
+    if (SelectedTrooper) {
+        SelectedTrooper->UpdateSelectionRadius(Action);
+    }        
     UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
                "with index %d"), CurrentAction, PlayerIndex);
 }

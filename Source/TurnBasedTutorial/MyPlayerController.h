@@ -43,8 +43,8 @@ public:
     // UFUNCTION(BlueprintCallable)
     // float SetCurrentActionAndReturnRadius(int action);
 
-    UFUNCTION(Client, Reliable)
-    void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
+    // UFUNCTION(Client, Reliable)
+    // void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
     
 private:
     // UPROPERTY(Replicated)

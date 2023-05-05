@@ -38,7 +38,7 @@ private:
     // UPROPERTY()
     // mutable TArray<ATrooper *> Troopers;
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(Server, Reliable)
     void StartGame();
 
     // UFUNCTION(BlueprintPure)

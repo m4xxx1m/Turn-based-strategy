@@ -143,8 +143,7 @@ void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
     }
 }
 
-
-void AMyGameMode::StartGame() {
+void AMyGameMode::StartGame_Implementation() {
     InitializeBattleField();
     // PlayerNotInTurn()->SetEnemySelection(Troopers);
     // PlayerInTurn()->SetEnemySelection(Troopers);
@@ -152,6 +151,16 @@ void AMyGameMode::StartGame() {
     // PlayerInTurn()->StartTurn();
     GetMyGameState()->StartGame();
 }
+
+
+// void AMyGameMode::StartGame() {
+//     InitializeBattleField();
+//     // PlayerNotInTurn()->SetEnemySelection(Troopers);
+//     // PlayerInTurn()->SetEnemySelection(Troopers);
+//     
+//     // PlayerInTurn()->StartTurn();
+//     GetMyGameState()->StartGame();
+// }
 
 
 // AMyPlayerController *AMyGameMode::PlayerInTurn() const {
