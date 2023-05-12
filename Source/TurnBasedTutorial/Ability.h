@@ -32,6 +32,9 @@ public:
 
     UPROPERTY(EditAnywhere)
     float LinearWidth = 50.0f;
+
+    UPROPERTY(EditAnywhere)
+    float Speed = 1500.0f;
     
     // Called every frame
     // virtual void TickComponent(float DeltaTime,

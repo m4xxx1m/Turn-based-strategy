@@ -36,10 +36,10 @@ public:
     FVector GetLocation() const;
 
     UFUNCTION(BlueprintCallable)
-    float GetAnimationValue();
+    int GetAnimationValue();
     
     UFUNCTION()
-    void Attack(int abilityIndex);
+    void Attack(int AbilityIndex, FVector ToLocation);
     
     UFUNCTION()
     float GetActionRadius(int action) const;
@@ -65,6 +65,9 @@ public:
     UFUNCTION()
     UAbility *GetAbility(int AbilityIndex) const;
 
+    UFUNCTION()
+    bool TakeDamage(float Damage);
+
 protected:
     constexpr static float PIXELS_IN_RADIUS = 50;
     
@@ -79,6 +82,24 @@ protected:
 
     UPROPERTY(EditAnywhere)
     UAbility *SpecialAbility;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<AMyProjectile> AttackProjectileClass;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<AMyProjectile> SpecialProjectileClass;
+
+    UFUNCTION()
+    TSubclassOf<AMyProjectile> GetProjectileClass(uint8 AbilityIndex) const;
+
+    UFUNCTION(Server, Reliable)
+    void FireProjectile();
+
+    UPROPERTY(Replicated)
+    uint8 CurrentAbilityIndex = -1;
+
+    UPROPERTY(Replicated)
+    FVector CurrentAbilityDestination = {};
     
     UPROPERTY(EditAnywhere)
     float Speed = 300.0f;
@@ -97,7 +118,7 @@ protected:
 
     UPROPERTY(Replicated)
     float ActionPoints;
-
+    
     UPROPERTY(Replicated)
     bool bIsAttacking = false;
 
@@ -106,6 +127,22 @@ protected:
 
     const float AttackDuration = 1.16667f;
 
+    const float FireAfterTime = 0.6f;
+
+    UPROPERTY(Replicated)
+    bool bIsWaitingForFire = false;
+
+    UPROPERTY(Replicated)
+    bool bIsTakingDamage = false;
+    
+    UPROPERTY(Replicated)
+    float TakingDamagePlayedTime;
+
+    const float TakingDamageDuration = 1.46667f;
+    
+    UPROPERTY(Replicated)
+    bool bIsDead = false;
+    
     virtual void BeginPlay() override;
 
     virtual void Tick(float const DeltaTime) override;

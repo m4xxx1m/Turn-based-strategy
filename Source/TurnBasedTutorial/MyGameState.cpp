@@ -62,6 +62,10 @@ AMyPlayerState *AMyGameState::PlayerNotInTurn() const {
     return GetMyPlayerState(!CurrentPlayerTurn);
 }
 
+TArray<ATrooper *> AMyGameState::GetTroopers() const {
+    return Troopers;
+}
+
 void AMyGameState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);

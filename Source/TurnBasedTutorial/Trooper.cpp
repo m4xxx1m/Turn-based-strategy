@@ -2,7 +2,7 @@
 #include <Kismet/GameplayStatics.h>
 
 #include "HealthBar.h"
-#include "MyPlayerState.h"
+#include "MyProjectile.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 
@@ -31,7 +31,6 @@ ATrooper::ATrooper()
     SelectionStaticMesh->SetVisibility(false);
 
     if (MeshToUse.Object) {
-        SelectionStaticMesh->SetStaticMesh(MeshToUse.Object);
         SelectionStaticMesh->SetStaticMesh(MeshToUse.Object);
     }
     // SelectionStaticMesh->SetRelativeTransform(FTransform({1000,1000,100}, {0, 0, 0}), false,
@@ -71,6 +70,7 @@ void ATrooper::Initialize(uint8 const NewPlayerIndex,
     PlayerIndex = NewPlayerIndex;
     bIsMoving = false;
     AttackPlayedTime = 0.0f;
+    TakingDamagePlayedTime = 0.0f;
     CurrentLocation = SpawnLocation;
     Id = NewId;
 }
@@ -78,9 +78,22 @@ void ATrooper::Initialize(uint8 const NewPlayerIndex,
 void ATrooper::Tick(float const DeltaTime) {
     if (bIsAttacking) {
         AttackPlayedTime += DeltaTime;
+        if (bIsWaitingForFire && AttackPlayedTime >= FireAfterTime) {
+            FireProjectile();
+            CurrentAbilityIndex = -1;
+            CurrentAbilityDestination = {};
+            bIsWaitingForFire = false;
+        }
         if (AttackPlayedTime >= AttackDuration) {
             AttackPlayedTime = 0.0f;
             bIsAttacking = false;
+        }
+    }
+    if (bIsTakingDamage) {
+        TakingDamagePlayedTime += DeltaTime;
+        if (TakingDamagePlayedTime >= TakingDamageDuration) {
+            TakingDamagePlayedTime = 0.0f;
+            bIsTakingDamage = false;
         }
     }
     if (bIsMoving) {
@@ -133,6 +146,11 @@ void ATrooper::GetLifetimeReplicatedProps(
     DOREPLIFETIME(ATrooper, ActionPoints);
     DOREPLIFETIME(ATrooper, HealthWidgetComponent);
     DOREPLIFETIME(ATrooper, AttackPlayedTime);
+    DOREPLIFETIME(ATrooper, TakingDamagePlayedTime);
+    DOREPLIFETIME(ATrooper, bIsTakingDamage);
+    DOREPLIFETIME(ATrooper, bIsDead);
+    DOREPLIFETIME(ATrooper, CurrentAbilityIndex);
+    DOREPLIFETIME(ATrooper, CurrentAbilityDestination);
 }
 
 uint8 ATrooper::GetPlayerIndex() const {
@@ -221,19 +239,89 @@ UAbility *ATrooper::GetAbility(int AbilityIndex) const {
     }
 }
 
-float ATrooper::GetAnimationValue() {
-    if (bIsAttacking) {
-        return -100.0f;
+bool ATrooper::TakeDamage(float Damage) {
+    HitPoints = FMath::Max<float>(0, HitPoints - Damage);
+    if (HitPoints == 0) {
+        bIsDead = true;
+        return true;
     }
-    if (bIsMoving) {
-        return 100.0f;
-    }
-    return 0.0f;
+    bIsTakingDamage = true;
+    return false;
 }
 
-void ATrooper::Attack(int abilityIndex) {
+TSubclassOf<AMyProjectile> ATrooper::GetProjectileClass(
+    uint8 AbilityIndex) const {
+    switch (AbilityIndex) {
+        case 1:
+            return AttackProjectileClass;
+        case 2:
+            return SpecialProjectileClass;
+        default:
+            return AMyProjectile::StaticClass();
+    }
+}
+
+void ATrooper::FireProjectile_Implementation() {
+    if (!this || !this->IsValidLowLevel())
+        return;
+    FTransform SpawnTransform(
+        (CurrentAbilityDestination - CurrentLocation).Rotation());
+    const FVector TransformedVector = SpawnTransform.TransformVector(
+        {GetAbility(CurrentAbilityIndex)->LinearWidth / 2 + 50.0f, 0.0f,
+         88.0f});
+    const FVector SpawnLocation = CurrentLocation + TransformedVector;
+    SpawnTransform.SetLocation(SpawnLocation);
+    FActorSpawnParameters SpawnParameters;
+    SpawnParameters.Owner = this;
+    SpawnParameters.Instigator = GetInstigator();
+    SpawnParameters.SpawnCollisionHandlingOverride =
+        ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AMyProjectile *Projectile = GetWorld()->SpawnActor<AMyProjectile>(
+        GetProjectileClass(CurrentAbilityIndex), SpawnTransform,
+        SpawnParameters);
+    Projectile->Initialize(GetAbility(CurrentAbilityIndex), CurrentAbilityIndex,
+                           (CurrentAbilityDestination - SpawnLocation).
+                           Size());
+    Projectile->Shoot(SpawnLocation, CurrentAbilityDestination);
+}
+
+int ATrooper::GetAnimationValue() {
+    if (bIsDead) {
+        return 4;
+    }
+    if (bIsTakingDamage) {
+        return 3;
+    }
+    if (bIsAttacking) {
+        return 2;
+    }
+    if (bIsMoving) {
+        return 1;
+    }
+    return 0;
+}
+
+void ATrooper::Attack(int AbilityIndex, FVector ToLocation) {
     bIsAttacking = true;
-    ActionPoints -= GetAbility(abilityIndex)->ActionCost;
+    bIsWaitingForFire = true;
+    ActionPoints -= GetAbility(AbilityIndex)->ActionCost;
+    CurrentAbilityIndex = AbilityIndex;
+    ToLocation.Z = 88.0f;
+    CurrentAbilityDestination = ToLocation;
+    // FTransform SpawnTransform((ToLocation - CurrentLocation).Rotation());
+    // SpawnTransform.SetLocation(
+    //     CurrentLocation + SpawnTransform.TransformVector(
+    //         {GetAbility(AbilityIndex)->LinearWidth/2 + 50.0f, 0.0f, 0.0f})
+    // );
+    // FActorSpawnParameters SpawnParameters;
+    // SpawnParameters.Owner = this;
+    // SpawnParameters.Instigator = GetInstigator();
+    // SpawnParameters.SpawnCollisionHandlingOverride =
+    //     ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    // AMyProjectile *Projectile = GetWorld()->SpawnActor<AMyProjectile>(
+    //     GetProjectileClass(AbilityIndex), SpawnTransform, SpawnParameters);
+    // Projectile->Initialize(GetAbility(AbilityIndex));
+    // Projectile->Shoot(CurrentLocation, ToLocation);
 }
 
 bool ATrooper::CheckMoveCorrectness(const FVector newPos) const {

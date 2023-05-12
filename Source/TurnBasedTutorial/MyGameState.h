@@ -31,8 +31,9 @@ public:
 
     UFUNCTION(BlueprintPure)
     AMyPlayerState *PlayerNotInTurn() const;
-
-    auto GetMyPlayerState(uint8 PlayerIndex) const;
+    
+    UFUNCTION()
+    TArray<ATrooper *> GetTroopers() const;
 
 private:
     UPROPERTY(Replicated)
@@ -41,4 +42,5 @@ private:
     UPROPERTY(Replicated)
     uint8 CurrentPlayerTurn{0};
     
+    auto GetMyPlayerState(uint8 PlayerIndex) const;
 };

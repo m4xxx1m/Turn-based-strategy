@@ -15,6 +15,10 @@ void AMyPlayerState::BeginPlay() {
     Super::BeginPlay();
 }
 
+auto AMyPlayerState::GetMyGameState() const {
+    return Cast<AMyGameState>(GetWorld()->GetGameState());
+}
+
 void AMyPlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
@@ -40,11 +44,30 @@ void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
     }
 }
 
+// void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
+//                                            FVector Location,
+//                                            int ActionIndex) {
+//     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
+//         Attacker->Attack(ActionIndex);
+//     } else {
+//         GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
+//                                          FString::Printf(
+//                                              TEXT(
+//                                                  "Out of radius or not enough Action Points!")));
+//     }
+// }
+
 void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
                                            FVector Location,
-                                           int ActionIndex) {
+                                           int ActionIndex,
+                                           const TArray<ATrooper *> &Troopers) {
     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
-        Attacker->Attack(ActionIndex);
+        Attacker->Attack(ActionIndex, Location);
+        // for (const auto Trooper : Troopers) {
+        //     if (Attacker->GetPlayerIndex() != Trooper->GetPlayerIndex()) {
+        //         Trooper->TakeDamage(Attacker->GetAbility(ActionIndex)->Damage);
+        //     }
+        // }
     } else {
         GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Red,
                                          FString::Printf(
@@ -55,7 +78,7 @@ void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
 
 void AMyPlayerState::CycleTurns() const {
     if (bIsMyTurn) {
-        Cast<AMyGameState>(GetWorld()->GetGameState())->CycleTurns();
+        GetMyGameState()->CycleTurns();
     }
 }
 
@@ -72,6 +95,7 @@ void AMyPlayerState::SetMyTurn(bool bMyTurn) {
                                              PlayerIndex));
     }
 }
+
 
 void AMyPlayerState::StartTurn_Implementation() {
     SetMyTurn(true);
@@ -122,7 +146,7 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
                     // ATTACK! ATTACK!
                     UE_LOG(LogTemp, Warning, TEXT("Do attack"));
                     Attack(SelectedTrooper, NewlySelectedLocation,
-                           CurrentAction);
+                           CurrentAction, GetMyGameState()->GetTroopers());
                     SelectedTrooper->SetSelection(false, CurrentAction);
                     SelectedTrooper = nullptr;
                     break;
@@ -145,7 +169,7 @@ void AMyPlayerState::SetCurrentAction_Implementation(int Action) {
     CurrentAction = Action;
     if (SelectedTrooper) {
         SelectedTrooper->UpdateSelectionRadius(Action);
-    }        
+    }
     UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
                "with index %d"), CurrentAction, PlayerIndex);
 }
