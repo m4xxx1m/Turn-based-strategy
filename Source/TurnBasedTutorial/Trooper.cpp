@@ -2,6 +2,8 @@
 #include <Kismet/GameplayStatics.h>
 
 #include "HealthBar.h"
+#include "MyPlayerController.h"
+#include "MyPlayerState.h"
 #include "MyProjectile.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -111,17 +113,20 @@ void ATrooper::Tick(float const DeltaTime) {
     }
 }
 
-// void ATrooper::OnRepNotify_PlayerIndex() {
-//     UE_LOG(LogTemp, Warning,
-//            TEXT("On rep notify, index: %d, id: %d, on server: %d, player state: %d"),
-//            PlayerIndex, Id, GetNetMode() == NM_DedicatedServer, GetPlayerState() != nullptr);
-//     // if (GetNetMode() != NM_DedicatedServer && GetPlayerState()) {
-//     //     if (Cast<AMyPlayerState>(GetPlayerState())->GetPlayerIndex() !=
-//     //         PlayerIndex) {
-//     //         HighlightAsEnemy();
-//     //     }
-//     // }
-// }
+void ATrooper::OnRepNotify_PlayerIndex() const {
+    const AMyPlayerState *player = Cast<AMyPlayerState>(
+        GetPlayerState());
+    if (!player)
+        return;
+    const uint8 ClientIndex = player->GetPlayerIndex();
+    UE_LOG(LogTemp, Warning,
+           TEXT("On rep notify, index: %d, client index: %d, id: %d"),
+           PlayerIndex,
+           ClientIndex, Id);
+    if (ClientIndex == PlayerIndex) {
+        HighlightAsEnemy();
+    }
+}
 
 void ATrooper::MoveTrooper(FVector const NewPos) {
     TargetLocation = NewPos;
@@ -240,6 +245,9 @@ UAbility *ATrooper::GetAbility(int AbilityIndex) const {
 }
 
 bool ATrooper::TakeDamage(float Damage) {
+    if (bIsTakingDamage) {
+        return false;
+    }
     HitPoints = FMath::Max<float>(0, HitPoints - Damage);
     if (HitPoints == 0) {
         bIsDead = true;
@@ -279,7 +287,8 @@ void ATrooper::FireProjectile_Implementation() {
     AMyProjectile *Projectile = GetWorld()->SpawnActor<AMyProjectile>(
         GetProjectileClass(CurrentAbilityIndex), SpawnTransform,
         SpawnParameters);
-    Projectile->Initialize(GetAbility(CurrentAbilityIndex), CurrentAbilityIndex,
+    Projectile->SetActorLocation(SpawnLocation);
+    Projectile->Initialize(GetAbility(CurrentAbilityIndex), PlayerIndex,
                            (CurrentAbilityDestination - SpawnLocation).
                            Size());
     Projectile->Shoot(SpawnLocation, CurrentAbilityDestination);

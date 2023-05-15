@@ -50,11 +50,13 @@ auto AMyPlayerController::GetMyGameMode() const {
 }
 
 
-void AMyPlayerController::EndTurn() {
+void AMyPlayerController::EndTurn_Implementation() {
     // if (GetMyPlayerState()->IsMyTurn()) {
     //     GetMyGameState()->CycleTurns();
     // }
-    GetMyPlayerState()->CycleTurns();
+    // GetMyPlayerState()->CycleTurns();
+    if (GetMyGameState()->IsInTurn(PlayerIndex))
+        GetMyGameState()->CycleTurns();
 }
 
 // void AMyPlayerController::EndTurn_Implementation() {
@@ -130,6 +132,10 @@ void AMyPlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
     
     GetMyPlayerState()->SetPlayerIndex(NewPlayerIndex);
     // GetMyPlayerState()->PlayerIndex = NewPlayerIndex;
+}
+
+uint8 AMyPlayerController::GetPlayerIndex() const {
+    return PlayerIndex;
 }
 
 // float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {

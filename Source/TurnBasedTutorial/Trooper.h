@@ -160,10 +160,10 @@ protected:
 
     // const TCHAR *MeshPath = nullptr;
 
-    // UFUNCTION()
-    // void OnRepNotify_PlayerIndex();
+    UFUNCTION()
+    void OnRepNotify_PlayerIndex() const;
     
-    UPROPERTY(Replicated/*Using = OnRepNotify_PlayerIndex*/)
+    UPROPERTY(ReplicatedUsing = OnRepNotify_PlayerIndex)
     uint8 PlayerIndex = -1;
     
     UPROPERTY(Replicated)

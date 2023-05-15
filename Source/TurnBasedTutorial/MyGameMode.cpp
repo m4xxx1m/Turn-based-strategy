@@ -6,6 +6,7 @@
 #include "MyGameState.h"
 #include "MyPlayerController.h"
 #include "MyPlayerState.h"
+#include "Trooper.h"
 
 AMyGameMode::AMyGameMode()
     : Super() {
@@ -25,7 +26,7 @@ auto AMyGameMode::GetMyGameState() const {
 }
 
 
-void AMyGameMode::InitializeBattleField() const {
+void AMyGameMode::InitializeBattleField_Implementation() const {
     UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
     FVector Location(2000.0f, -1000.0f, 0.0f);
     FRotator Rotation(0.0f, 180.0f, 0.0f);
@@ -121,6 +122,7 @@ void AMyGameMode::InitializeSpawnPointsIfNeeded(AController *Player) {
 
 void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
     Super::PostLogin(NewPlayer);
+    NewPlayer->SetShowMouseCursor(true);
     UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
     // PlayerControllers.Add(dynamic_cast<AMyPlayerController *>(NewPlayer));
     // const auto World = GetWorld();
@@ -137,6 +139,8 @@ void AMyGameMode::PostLogin(APlayerController *NewPlayer) {
         //             GetWorld()->GetGameState())->StartGame();
         // InitializeBattleField();
         StartGame();
+        // GetMyGameState()->PlayerInTurn()->SetEnemySelection();
+        // GetMyGameState()->PlayerNotInTurn()->SetEnemySelection();
     } else {
         // delay the game
         UE_LOG(LogTemp, Warning, TEXT("Game Delay"));

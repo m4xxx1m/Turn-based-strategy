@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "Trooper.h"
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
 #include "MyPlayerState.generated.h"
@@ -33,8 +34,8 @@ public:
                 int ActionIndex,
                 const TArray<ATrooper *> &Troopers);
 
-    UFUNCTION()
-    void CycleTurns() const;
+    // UFUNCTION(Client, Reliable)
+    // void CycleTurns() const;
 
     UFUNCTION(BlueprintCallable)
     bool IsMyTurn() const;
@@ -46,7 +47,7 @@ public:
     void SetCurrentAction(int Action);
 
     UFUNCTION(BlueprintCallable)
-    uint8 GetPlayerIndex();
+    uint8 GetPlayerIndex() const;
 
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
@@ -54,7 +55,9 @@ public:
     UFUNCTION(Client, Reliable)
     void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
 
+
 private:
+    
     UPROPERTY(Replicated)
     uint8 PlayerIndex;
 

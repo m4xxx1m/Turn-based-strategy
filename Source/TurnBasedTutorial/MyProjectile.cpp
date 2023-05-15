@@ -3,15 +3,19 @@
 
 #include "MyProjectile.h"
 
+#include "Trooper.h"
 #include "Net/UnrealNetwork.h"
-#include "VisualLogger/VisualLoggerCustomVersion.h"
 
 AMyProjectile::AMyProjectile() {
+    // if (!RootComponent) {
+    //     RootComponent = CreateDefaultSubobject<USceneComponent>(
+    //         TEXT("ProjectileSceneComponent"));
+    // }
     // if (!CollisionComponent) {
     //     CollisionComponent = CreateDefaultSubobject<USphereComponent>(
     //         TEXT("SphereComponent"));
+    //     RootComponent = CollisionComponent;
     // }
-    // RootComponent = CollisionComponent;
     if (!ProjectileMeshComponent) {
         ProjectileMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(
             TEXT("ProjectileMeshComponent"));
@@ -27,7 +31,9 @@ AMyProjectile::AMyProjectile() {
         ProjectileMovementComponent = CreateDefaultSubobject<
             UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
         ProjectileMovementComponent->SetUpdatedComponent(
+            // CollisionComponent);
             ProjectileMeshComponent);
+        ProjectileMovementComponent->bRotationFollowsVelocity = true;
         ProjectileMovementComponent->InitialSpeed = 1000.0f;
         ProjectileMovementComponent->MaxSpeed = 1000.0f;
         ProjectileMovementComponent->ProjectileGravityScale = 0.0f;
@@ -42,6 +48,7 @@ void AMyProjectile::Initialize(const UAbility *Ability,
         ProjectileMovementComponent->MaxSpeed = Ability->Speed;
     Damage = Ability->Damage;
     float Scale = Ability->LinearWidth / 100;
+    // CollisionComponent->SetSphereRadius(Ability->LinearWidth / 2);
     ProjectileMeshComponent->SetWorldScale3D({Scale, Scale, Scale});
     PlayerIndex = playerIndex;
     SetLifeSpan(PathLength / Ability->Speed);
@@ -50,6 +57,51 @@ void AMyProjectile::Initialize(const UAbility *Ability,
 void AMyProjectile::Shoot(FVector From, FVector To) const {
     ProjectileMovementComponent->Velocity =
         (To - From).GetSafeNormal() * ProjectileMovementComponent->InitialSpeed;
+}
+
+void AMyProjectile::NotifyActorBeginOverlap(AActor *OtherActor) {
+    Super::NotifyActorBeginOverlap(OtherActor);
+    ATrooper *OtherTrooper = Cast<ATrooper>(OtherActor);
+    if (OtherTrooper) {
+        UE_LOG(LogTemp, Warning,
+               TEXT("Begin overlap: id: %d, index: %d, damage: %f, my index: %d"
+               ),
+               OtherTrooper->GetId(), OtherTrooper->GetPlayerIndex(), Damage,
+               PlayerIndex);
+        if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
+            GetPlayerIndex()) {
+            OtherTrooper->TakeDamage(Damage);
+        }
+    } else {
+        UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));
+    }
+}
+
+void AMyProjectile::NotifyHit(UPrimitiveComponent *MyComp,
+                              AActor *Other,
+                              UPrimitiveComponent *OtherComp,
+                              bool bSelfMoved,
+                              FVector HitLocation,
+                              FVector HitNormal,
+                              FVector NormalImpulse,
+                              const FHitResult &Hit) {
+    Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
+                     HitNormal,
+                     NormalImpulse, Hit);
+    ATrooper *OtherTrooper = Cast<ATrooper>(Other);
+    if (OtherTrooper) {
+        UE_LOG(LogTemp, Warning,
+               TEXT("On Hit: id: %d, index: %d, damage: %f, my index: %d"
+               ),
+               OtherTrooper->GetId(), OtherTrooper->GetPlayerIndex(), Damage,
+               PlayerIndex);
+        if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
+            GetPlayerIndex()) {
+            OtherTrooper->TakeDamage(Damage);
+        }
+    } else {
+        UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));
+    }
 }
 
 
@@ -61,4 +113,8 @@ void AMyProjectile::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AMyProjectile, Damage);
+    DOREPLIFETIME(AMyProjectile, PlayerIndex);
+    // DOREPLIFETIME(AMyProjectile, CollisionComponent);
+    DOREPLIFETIME(AMyProjectile, ProjectileMeshComponent);
+    DOREPLIFETIME(AMyProjectile, ProjectileMovementComponent);
 }

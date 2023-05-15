@@ -14,7 +14,7 @@ void AMyGameState::BeginPlay() {
     Super::BeginPlay();
 }
 
-void AMyGameState::AddTrooper(ATrooper *Trooper) {
+void AMyGameState::AddTrooper_Implementation(ATrooper *Trooper) {
     Troopers.Add(Trooper);
 }
 
@@ -64,6 +64,10 @@ AMyPlayerState *AMyGameState::PlayerNotInTurn() const {
 
 TArray<ATrooper *> AMyGameState::GetTroopers() const {
     return Troopers;
+}
+
+bool AMyGameState::IsInTurn(uint8 PlayerIndex) const {
+    return PlayerIndex == CurrentPlayerTurn;
 }
 
 void AMyGameState::GetLifetimeReplicatedProps(

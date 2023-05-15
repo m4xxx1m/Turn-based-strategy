@@ -17,7 +17,7 @@ class TURNBASEDTUTORIAL_API AMyGameState : public AGameState {
 public:
     virtual void BeginPlay() override;
     
-    UFUNCTION()
+    UFUNCTION(Server, Reliable)
     void AddTrooper(ATrooper *Trooper);
 
     UFUNCTION(Server, Reliable)
@@ -34,6 +34,9 @@ public:
     
     UFUNCTION()
     TArray<ATrooper *> GetTroopers() const;
+
+    UFUNCTION()
+    bool IsInTurn(uint8 PlayerIndex) const;
 
 private:
     UPROPERTY(Replicated)

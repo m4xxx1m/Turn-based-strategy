@@ -4,7 +4,6 @@
 #include "MyPlayerState.h"
 
 #include "MyGameState.h"
-#include "Trooper.h"
 #include "Net/UnrealNetwork.h"
 
 AMyPlayerState::AMyPlayerState()
@@ -34,6 +33,7 @@ void AMyPlayerState::SetEnemySelection_Implementation(
 
 void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
                                                 FVector Location) {
+    Location.Z = 0.0f;
     if (Trooper->CheckMoveCorrectness(Location)) {
         Trooper->MoveTrooper(Location);
         // GetMyGameMode()->CycleTurns();
@@ -76,11 +76,11 @@ void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
     }
 }
 
-void AMyPlayerState::CycleTurns() const {
-    if (bIsMyTurn) {
-        GetMyGameState()->CycleTurns();
-    }
-}
+// void AMyPlayerState::CycleTurns_Implementation() const {
+//     if (bIsMyTurn) {
+//         GetMyGameState()->CycleTurns();
+//     }
+// }
 
 bool AMyPlayerState::IsMyTurn() const {
     return bIsMyTurn;
@@ -175,7 +175,7 @@ void AMyPlayerState::SetCurrentAction_Implementation(int Action) {
 }
 
 
-uint8 AMyPlayerState::GetPlayerIndex() {
+uint8 AMyPlayerState::GetPlayerIndex() const {
     return PlayerIndex;
 }
 

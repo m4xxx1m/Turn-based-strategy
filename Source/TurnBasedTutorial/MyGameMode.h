@@ -30,6 +30,7 @@ public:
 private:
     void InitializeSpawnPointsIfNeeded(AController *Player);
 
+    UFUNCTION(Server, Reliable)
     void InitializeBattleField() const;
 
     UPROPERTY()
@@ -40,6 +41,7 @@ private:
 
     UFUNCTION(Server, Reliable)
     void StartGame();
+
 
     // UFUNCTION(BlueprintPure)
     // AMyPlayerController *PlayerInTurn() const;

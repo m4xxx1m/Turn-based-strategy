@@ -2,7 +2,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Trooper.h"
 #include "GameFramework/PlayerController.h"
 #include "MyPlayerController.generated.h"
 
@@ -19,7 +18,7 @@ public:
 
     AMyPlayerController();
 
-    UFUNCTION(BlueprintCallable)
+    UFUNCTION(BlueprintCallable, Server, Reliable)
     void EndTurn();
 
     // UFUNCTION(Client, Reliable)
@@ -39,6 +38,9 @@ public:
 
     UFUNCTION()
     void SetPlayerIndex(uint8 NewPlayerIndex);
+
+    UFUNCTION()
+    uint8 GetPlayerIndex() const;
 
     // UFUNCTION(BlueprintCallable)
     // float SetCurrentActionAndReturnRadius(int action);
