@@ -41,9 +41,18 @@ public:
     UFUNCTION()
     bool IsGameStarted() const;
 
+    UFUNCTION()
+    void DecreaseLivingTroopers(int PlayerIndex);
+
 private:
     UPROPERTY(Replicated)
+    bool bGameIsOver = false;
+    
+    UPROPERTY(Replicated)
     TArray<ATrooper *> Troopers;
+
+    UPROPERTY(Replicated)
+    TArray<int> LivingTroopers;
 
     UPROPERTY(Replicated)
     bool bGameStarted = false;

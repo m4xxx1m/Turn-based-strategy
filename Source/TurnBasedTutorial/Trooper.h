@@ -18,9 +18,9 @@ public:
                     uint8 const NewId);
 
     UFUNCTION()
-    uint8 GetPlayerIndex() const;
+    int8 GetPlayerIndex() const;
 
-    UFUNCTION()
+    UFUNCTION(Server, Reliable)
     void MoveTrooper(FVector const NewPos);
 
     UFUNCTION()
@@ -38,7 +38,7 @@ public:
     UFUNCTION(BlueprintCallable)
     int GetAnimationValue();
     
-    UFUNCTION()
+    UFUNCTION(Server, Reliable)
     void Attack(int AbilityIndex, FVector ToLocation);
     
     UFUNCTION()
@@ -65,8 +65,8 @@ public:
     UFUNCTION()
     UAbility *GetAbility(int AbilityIndex) const;
 
-    UFUNCTION()
-    bool TakeDamage(float Damage);
+    UFUNCTION(Server, Reliable)
+    void TakeDamage(float Damage);
 
 protected:
     constexpr static float PIXELS_IN_RADIUS = 50;
@@ -139,6 +139,8 @@ protected:
     float TakingDamagePlayedTime;
 
     const float TakingDamageDuration = 1.46667f;
+
+    const float DyingAnimationDuration = 2.83333f;
     
     UPROPERTY(Replicated)
     bool bIsDead = false;
