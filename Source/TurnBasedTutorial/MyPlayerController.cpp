@@ -5,12 +5,20 @@
 #include "MyGameMode.h"
 #include "MyGameState.h"
 #include "MyPlayerState.h"
+#include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 
 AMyPlayerController::AMyPlayerController()
     : Super()/*, bIsMyTurn(false), SelectedTrooper(nullptr)*/ {
     UE_LOG(LogTemp, Warning, TEXT("Player controller created"));
     SetShowMouseCursor(true);
+}
+
+void AMyPlayerController::BeginPlay() {
+    Super::BeginPlay();
+    UUserWidget *CreatedWidget = CreateWidget<UUserWidget>(
+        GetWorld(), WidgetClass);
+    CreatedWidget->AddToViewport();
 }
 
 void AMyPlayerController::SetupInputComponent() {
@@ -129,7 +137,7 @@ void AMyPlayerController::EndTurn_Implementation() {
 
 void AMyPlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
-    
+
     GetMyPlayerState()->SetPlayerIndex(NewPlayerIndex);
     // GetMyPlayerState()->PlayerIndex = NewPlayerIndex;
 }
