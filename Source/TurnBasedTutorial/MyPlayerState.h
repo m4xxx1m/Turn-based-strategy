@@ -19,6 +19,8 @@ public:
 
     virtual void BeginPlay() override;
 
+    // virtual void Tick(float DeltaSeconds) override;
+
     UFUNCTION(Client, Reliable)
     void StartTurn();
 
@@ -53,10 +55,11 @@ public:
     void SetPlayerIndex(uint8 NewPlayerIndex);
 
     UFUNCTION(Client, Reliable)
-    void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
-
+    void SetEnemySelection(/*const TArray<AActor *> &Troopers*/) const;
 
 private:
+    UPROPERTY(Replicated)
+    bool bIsSelectionInitialized = false;
     
     UPROPERTY(Replicated)
     uint8 PlayerIndex;

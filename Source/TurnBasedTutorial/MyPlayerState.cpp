@@ -4,10 +4,12 @@
 #include "MyPlayerState.h"
 
 #include "MyGameState.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 AMyPlayerState::AMyPlayerState()
     : Super(), bIsMyTurn(false), SelectedTrooper(nullptr) {
+    // PrimaryActorTick.bCanEverTick = true;
 }
 
 void AMyPlayerState::BeginPlay() {
@@ -18,15 +20,35 @@ auto AMyPlayerState::GetMyGameState() const {
     return Cast<AMyGameState>(GetWorld()->GetGameState());
 }
 
+// void AMyPlayerState::Tick(float DeltaSeconds) {
+//     Super::Tick(DeltaSeconds);
+//     if (GetMyGameState() && GetMyGameState()->IsGameStarted()) {
+//         // for (const auto Actor : Troopers) {
+//         //     const auto Trooper = Cast<ATrooper>(Actor);
+//         //     if (Trooper != nullptr && Trooper->GetPlayerIndex() !=
+//         //         PlayerIndex) {
+//         //         Trooper->HighlightAsEnemy(PlayerIndex);
+//         //     }
+//         // }
+//         bIsSelectionInitialized = true;
+//         SetActorTickEnabled(false);
+//     }
+// }
+
 void AMyPlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
 
 void AMyPlayerState::SetEnemySelection_Implementation(
-    const TArray<ATrooper *> &Troopers) const {
-    for (const auto Trooper : Troopers) {
-        if (Trooper != nullptr && Trooper->GetPlayerIndex() != PlayerIndex) {
-            Trooper->HighlightAsEnemy();
+    /*const TArray<AActor *> &Troopers*/) const {
+    TArray<AActor *> Troopers;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(),
+                                          ATrooper::StaticClass(),
+                                          Troopers);
+    for (const auto Actor : Troopers) {
+        const auto Trooper = Cast<ATrooper>(Actor);
+        if (Trooper != nullptr) {
+            Trooper->HighlightAsEnemy(PlayerIndex);
         }
     }
 }
@@ -60,7 +82,8 @@ void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
 void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
                                            FVector Location,
                                            int ActionIndex,
-                                           const TArray<ATrooper *> &Troopers) {
+                                           const TArray<ATrooper *> &
+                                           Troopers) {
     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
         Attacker->Attack(ActionIndex, Location);
         // for (const auto Trooper : Troopers) {
@@ -96,7 +119,6 @@ void AMyPlayerState::SetMyTurn(bool bMyTurn) {
     }
 }
 
-
 void AMyPlayerState::StartTurn_Implementation() {
     SetMyTurn(true);
     UE_LOG(LogTemp, Warning, TEXT("Your turn, %d"), PlayerIndex);
@@ -104,7 +126,8 @@ void AMyPlayerState::StartTurn_Implementation() {
 
 void AMyPlayerState::EndTurn_Implementation() {
     if (bIsMyTurn) {
-        UE_LOG(LogTemp, Warning, TEXT("End Turn from player %d"), PlayerIndex);
+        UE_LOG(LogTemp, Warning, TEXT("End Turn from player %d"),
+               PlayerIndex);
         SetMyTurn(false);
         if (SelectedTrooper) {
             SelectedTrooper->SetSelection(false, CurrentAction);
@@ -116,7 +139,6 @@ void AMyPlayerState::EndTurn_Implementation() {
         // Cast<AMyGameState>(GetWorld()->GetGameState())->CycleTurns();
     }
 }
-
 
 void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
     auto const NewlySelectedLocation = HitResult.Location;
@@ -132,7 +154,8 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
     if (NewlySelectedTrooper == nullptr || !NewlySelectedTrooper->
         IsValidLowLevel() || NewlySelectedTrooper->GetPlayerIndex() !=
         PlayerIndex) {
-        if (SelectedTrooper != nullptr && SelectedTrooper->IsValidLowLevel()) {
+        if (SelectedTrooper != nullptr && SelectedTrooper->
+            IsValidLowLevel()) {
             switch (CurrentAction) {
                 case 0:
                     UE_LOG(LogTemp, Warning, TEXT("Do move"));
@@ -153,7 +176,8 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
             }
         }
     } else if (NewlySelectedTrooper != nullptr && NewlySelectedTrooper->
-               IsValidLowLevel() && NewlySelectedTrooper->GetPlayerIndex() ==
+               IsValidLowLevel() && NewlySelectedTrooper->GetPlayerIndex()
+               ==
                PlayerIndex) {
         UE_LOG(LogTemp, Warning, TEXT("Do reselect"));
         // our move, selection
@@ -170,10 +194,10 @@ void AMyPlayerState::SetCurrentAction_Implementation(int Action) {
     if (SelectedTrooper) {
         SelectedTrooper->UpdateSelectionRadius(Action);
     }
-    UE_LOG(LogTemp, Warning, TEXT("SetCurrentAction: %d on Player Controller "
+    UE_LOG(LogTemp, Warning,
+           TEXT("SetCurrentAction: %d on Player Controller "
                "with index %d"), CurrentAction, PlayerIndex);
 }
-
 
 uint8 AMyPlayerState::GetPlayerIndex() const {
     return PlayerIndex;
@@ -186,4 +210,5 @@ void AMyPlayerState::GetLifetimeReplicatedProps(
     DOREPLIFETIME(AMyPlayerState, CurrentAction);
     DOREPLIFETIME(AMyPlayerState, bIsMyTurn);
     DOREPLIFETIME(AMyPlayerState, SelectedTrooper);
+    DOREPLIFETIME(AMyPlayerState, bIsSelectionInitialized);
 }

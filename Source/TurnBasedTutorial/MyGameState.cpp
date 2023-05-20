@@ -18,17 +18,12 @@ void AMyGameState::AddTrooper_Implementation(ATrooper *Trooper) {
     Troopers.Add(Trooper);
 }
 
-void AMyGameState::StartGame_Implementation() const {
-    PlayerNotInTurn()->SetEnemySelection(Troopers);
-    PlayerInTurn()->SetEnemySelection(Troopers);
+void AMyGameState::StartGame_Implementation() {
+    PlayerNotInTurn()->SetEnemySelection();
+    PlayerInTurn()->SetEnemySelection();
+    bGameStarted = true;
     PlayerInTurn()->StartTurn();
 }
-
-// void AMyGameState::StartGame() const {
-//     PlayerNotInTurn()->SetEnemySelection(Troopers);
-//     PlayerInTurn()->SetEnemySelection(Troopers);
-//     PlayerInTurn()->StartTurn();
-// }
 
 void AMyGameState::CycleTurns_Implementation() {
     PlayerInTurn()->EndTurn();
@@ -70,9 +65,14 @@ bool AMyGameState::IsInTurn(uint8 PlayerIndex) const {
     return PlayerIndex == CurrentPlayerTurn;
 }
 
+bool AMyGameState::IsGameStarted() const {
+    return bGameStarted;
+}
+
 void AMyGameState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AMyGameState, Troopers);
     DOREPLIFETIME(AMyGameState, CurrentPlayerTurn);
+    DOREPLIFETIME(AMyGameState, bGameStarted);
 }

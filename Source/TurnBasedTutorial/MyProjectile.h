@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Ability.h"
+#include "MyExplosion.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
@@ -24,21 +25,27 @@ public:
 
 protected:
     virtual void NotifyActorBeginOverlap(AActor *OtherActor) override;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<AMyExplosion> ExplosionSubclass;
 
-    virtual void NotifyHit(UPrimitiveComponent *MyComp,
-                           AActor *Other,
-                           UPrimitiveComponent *OtherComp,
-                           bool bSelfMoved,
-                           FVector HitLocation,
-                           FVector HitNormal,
-                           FVector NormalImpulse,
-                           const FHitResult &Hit) override;
+    // virtual void NotifyHit(UPrimitiveComponent *MyComp,
+    //                        AActor *Other,
+    //                        UPrimitiveComponent *OtherComp,
+    //                        bool bSelfMoved,
+    //                        FVector HitLocation,
+    //                        FVector HitNormal,
+    //                        FVector NormalImpulse,
+    //                        const FHitResult &Hit) override;
 
     UPROPERTY(Replicated)
     float Damage;
 
     UPROPERTY(Replicated)
     int8 PlayerIndex = -1;
+
+    UPROPERTY(Replicated)
+    float SplashRadius;
 
     // UPROPERTY(EditAnywhere, Replicated)
     // USphereComponent *CollisionComponent;
@@ -50,4 +57,9 @@ protected:
     UProjectileMovementComponent *ProjectileMovementComponent;
 
     virtual void BeginPlay() override;
+
+    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+    UFUNCTION(Server, Reliable)
+    void Explode() const;
 };

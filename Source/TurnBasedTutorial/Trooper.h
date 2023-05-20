@@ -57,8 +57,8 @@ public:
     void UpdateSelectionRadius(uint8 ActionType) const;
 
     UFUNCTION(Client, Reliable)
-    void HighlightAsEnemy() const;
-
+    void HighlightAsEnemy(int8 Index) const;
+    
     UFUNCTION()
     void ResetActionPoints();
 
@@ -160,11 +160,11 @@ protected:
 
     // const TCHAR *MeshPath = nullptr;
 
-    UFUNCTION()
-    void OnRepNotify_PlayerIndex() const;
+    // UFUNCTION()
+    // void OnRepNotify_PlayerIndex() const;
     
-    UPROPERTY(ReplicatedUsing = OnRepNotify_PlayerIndex)
-    uint8 PlayerIndex = -1;
+    UPROPERTY(Replicated/*Using = OnRepNotify_PlayerIndex*/)
+    int8 PlayerIndex = -1;
     
     UPROPERTY(Replicated)
     uint8 Id;

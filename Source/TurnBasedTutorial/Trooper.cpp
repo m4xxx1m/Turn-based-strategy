@@ -113,20 +113,20 @@ void ATrooper::Tick(float const DeltaTime) {
     }
 }
 
-void ATrooper::OnRepNotify_PlayerIndex() const {
-    const AMyPlayerState *player = Cast<AMyPlayerState>(
-        GetPlayerState());
-    if (!player)
-        return;
-    const uint8 ClientIndex = player->GetPlayerIndex();
-    UE_LOG(LogTemp, Warning,
-           TEXT("On rep notify, index: %d, client index: %d, id: %d"),
-           PlayerIndex,
-           ClientIndex, Id);
-    if (ClientIndex == PlayerIndex) {
-        HighlightAsEnemy();
-    }
-}
+// void ATrooper::OnRepNotify_PlayerIndex() const {
+//     const AMyPlayerState *player = Cast<AMyPlayerState>(
+//         GetPlayerState());
+//     if (!player)
+//         return;
+//     const uint8 ClientIndex = player->GetPlayerIndex();
+//     UE_LOG(LogTemp, Warning,
+//            TEXT("On rep notify, index: %d, client index: %d, id: %d"),
+//            PlayerIndex,
+//            ClientIndex, Id);
+//     if (ClientIndex == PlayerIndex) {
+//         HighlightAsEnemy();
+//     }
+// }
 
 void ATrooper::MoveTrooper(FVector const NewPos) {
     TargetLocation = NewPos;
@@ -225,8 +225,10 @@ void ATrooper::UpdateSelectionRadius(uint8 ActionType) const {
         {radiusScale, radiusScale, 0.01f});
 }
 
-void ATrooper::HighlightAsEnemy_Implementation() const {
-    SelectionStaticMesh->SetVisibility(true);
+void ATrooper::HighlightAsEnemy_Implementation(int8 Index) const {
+    if (PlayerIndex != Index) {
+        SelectionStaticMesh->SetVisibility(true);
+    }
 }
 
 void ATrooper::ResetActionPoints() {

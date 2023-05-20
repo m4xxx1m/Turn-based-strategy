@@ -47,6 +47,7 @@ void AMyProjectile::Initialize(const UAbility *Ability,
     ProjectileMovementComponent->InitialSpeed =
         ProjectileMovementComponent->MaxSpeed = Ability->Speed;
     Damage = Ability->Damage;
+    SplashRadius = Ability->SplashRadius;
     float Scale = Ability->LinearWidth / 100;
     // CollisionComponent->SetSphereRadius(Ability->LinearWidth / 2);
     ProjectileMeshComponent->SetWorldScale3D({Scale, Scale, Scale});
@@ -77,36 +78,53 @@ void AMyProjectile::NotifyActorBeginOverlap(AActor *OtherActor) {
     }
 }
 
-void AMyProjectile::NotifyHit(UPrimitiveComponent *MyComp,
-                              AActor *Other,
-                              UPrimitiveComponent *OtherComp,
-                              bool bSelfMoved,
-                              FVector HitLocation,
-                              FVector HitNormal,
-                              FVector NormalImpulse,
-                              const FHitResult &Hit) {
-    Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
-                     HitNormal,
-                     NormalImpulse, Hit);
-    ATrooper *OtherTrooper = Cast<ATrooper>(Other);
-    if (OtherTrooper) {
-        UE_LOG(LogTemp, Warning,
-               TEXT("On Hit: id: %d, index: %d, damage: %f, my index: %d"
-               ),
-               OtherTrooper->GetId(), OtherTrooper->GetPlayerIndex(), Damage,
-               PlayerIndex);
-        if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
-            GetPlayerIndex()) {
-            OtherTrooper->TakeDamage(Damage);
-        }
-    } else {
-        UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));
-    }
-}
+// void AMyProjectile::NotifyHit(UPrimitiveComponent *MyComp,
+//                               AActor *Other,
+//                               UPrimitiveComponent *OtherComp,
+//                               bool bSelfMoved,
+//                               FVector HitLocation,
+//                               FVector HitNormal,
+//                               FVector NormalImpulse,
+//                               const FHitResult &Hit) {
+//     Super::NotifyHit(MyComp, Other, OtherComp, bSelfMoved, HitLocation,
+//                      HitNormal,
+//                      NormalImpulse, Hit);
+//     ATrooper *OtherTrooper = Cast<ATrooper>(Other);
+//     if (OtherTrooper) {
+//         UE_LOG(LogTemp, Warning,
+//                TEXT("On Hit: id: %d, index: %d, damage: %f, my index: %d"
+//                ),
+//                OtherTrooper->GetId(), OtherTrooper->GetPlayerIndex(), Damage,
+//                PlayerIndex);
+//         if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
+//             GetPlayerIndex()) {
+//             OtherTrooper->TakeDamage(Damage);
+//         }
+//     } else {
+//         UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));
+//     }
+// }
 
 
 void AMyProjectile::BeginPlay() {
     Super::BeginPlay();
+}
+
+void AMyProjectile::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+    Super::EndPlay(EndPlayReason);
+    Explode();
+}
+
+void AMyProjectile::Explode_Implementation() const {
+    const FTransform SpawnTransform = GetTransform();
+    FActorSpawnParameters SpawnParameters;
+    SpawnParameters.Instigator = GetInstigator();
+    SpawnParameters.SpawnCollisionHandlingOverride =
+        ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    AMyExplosion *Explosion = GetWorld()->SpawnActor<AMyExplosion>(
+        ExplosionSubclass, SpawnTransform, SpawnParameters);
+    Explosion->Initialize(Damage, SplashRadius, PlayerIndex);
+    Explosion->SetActorLocation(GetActorLocation());
 }
 
 void AMyProjectile::GetLifetimeReplicatedProps(
@@ -117,4 +135,5 @@ void AMyProjectile::GetLifetimeReplicatedProps(
     // DOREPLIFETIME(AMyProjectile, CollisionComponent);
     DOREPLIFETIME(AMyProjectile, ProjectileMeshComponent);
     DOREPLIFETIME(AMyProjectile, ProjectileMovementComponent);
+    DOREPLIFETIME(AMyProjectile, SplashRadius);
 }
