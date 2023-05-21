@@ -12,23 +12,22 @@ auto AMyGameState::GetMyPlayerState(uint8 PlayerIndex) const {
 
 void AMyGameState::BeginPlay() {
     Super::BeginPlay();
+    LivingTroopers.SetNum(2);
 }
 
 void AMyGameState::AddTrooper_Implementation(ATrooper *Trooper) {
+    if (Trooper->GetPlayerIndex() >= 0 && Trooper->GetPlayerIndex() <= LivingTroopers.Num()) {
+        LivingTroopers[Trooper->GetPlayerIndex()]++;
+    }
     Troopers.Add(Trooper);
 }
 
-void AMyGameState::StartGame_Implementation() const {
-    PlayerNotInTurn()->SetEnemySelection(Troopers);
-    PlayerInTurn()->SetEnemySelection(Troopers);
+void AMyGameState::StartGame_Implementation() {
+    PlayerNotInTurn()->SetEnemySelection();
+    PlayerInTurn()->SetEnemySelection();
+    bGameStarted = true;
     PlayerInTurn()->StartTurn();
 }
-
-// void AMyGameState::StartGame() const {
-//     PlayerNotInTurn()->SetEnemySelection(Troopers);
-//     PlayerInTurn()->SetEnemySelection(Troopers);
-//     PlayerInTurn()->StartTurn();
-// }
 
 void AMyGameState::CycleTurns_Implementation() {
     PlayerInTurn()->EndTurn();
@@ -70,9 +69,25 @@ bool AMyGameState::IsInTurn(uint8 PlayerIndex) const {
     return PlayerIndex == CurrentPlayerTurn;
 }
 
+bool AMyGameState::IsGameStarted() const {
+    return bGameStarted;
+}
+
+void AMyGameState::DecreaseLivingTroopers(int PlayerIndex) {
+    if (bGameIsOver)
+         return;
+    LivingTroopers[PlayerIndex]--;
+    if (LivingTroopers[PlayerIndex] <= 0) {
+        UE_LOG(LogTemp, Warning, TEXT("Player %d lose!"), PlayerIndex);
+        bGameIsOver = true;
+    }
+}
+
+
 void AMyGameState::GetLifetimeReplicatedProps(
     TArray<FLifetimeProperty> &OutLifetimeProps) const {
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
     DOREPLIFETIME(AMyGameState, Troopers);
     DOREPLIFETIME(AMyGameState, CurrentPlayerTurn);
+    DOREPLIFETIME(AMyGameState, bGameStarted);
 }

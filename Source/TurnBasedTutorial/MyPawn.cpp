@@ -15,6 +15,20 @@ void AMyPawn::BeginPlay() {
     Super::BeginPlay();
 }
 
+void AMyPawn::MoveForward(float Val) {
+    if (Val != 0.f)
+    {
+        if (Controller)
+        {
+            FRotator ControlSpaceRot = Controller->GetControlRotation();
+            ControlSpaceRot.Pitch = 0;
+
+            // transform to world space and add it
+            AddMovementInput( FRotationMatrix(ControlSpaceRot).GetScaledAxis( EAxis::X ), Val );
+        }
+    }
+}
+
 // Called every frame
 void AMyPawn::Tick(float DeltaTime) {
     Super::Tick(DeltaTime);

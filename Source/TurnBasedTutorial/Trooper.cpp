@@ -2,6 +2,7 @@
 #include <Kismet/GameplayStatics.h>
 
 #include "HealthBar.h"
+#include "MyGameState.h"
 #include "MyPlayerController.h"
 #include "MyPlayerState.h"
 #include "MyProjectile.h"
@@ -113,22 +114,22 @@ void ATrooper::Tick(float const DeltaTime) {
     }
 }
 
-void ATrooper::OnRepNotify_PlayerIndex() const {
-    const AMyPlayerState *player = Cast<AMyPlayerState>(
-        GetPlayerState());
-    if (!player)
-        return;
-    const uint8 ClientIndex = player->GetPlayerIndex();
-    UE_LOG(LogTemp, Warning,
-           TEXT("On rep notify, index: %d, client index: %d, id: %d"),
-           PlayerIndex,
-           ClientIndex, Id);
-    if (ClientIndex == PlayerIndex) {
-        HighlightAsEnemy();
-    }
-}
+// void ATrooper::OnRepNotify_PlayerIndex() const {
+//     const AMyPlayerState *player = Cast<AMyPlayerState>(
+//         GetPlayerState());
+//     if (!player)
+//         return;
+//     const uint8 ClientIndex = player->GetPlayerIndex();
+//     UE_LOG(LogTemp, Warning,
+//            TEXT("On rep notify, index: %d, client index: %d, id: %d"),
+//            PlayerIndex,
+//            ClientIndex, Id);
+//     if (ClientIndex == PlayerIndex) {
+//         HighlightAsEnemy();
+//     }
+// }
 
-void ATrooper::MoveTrooper(FVector const NewPos) {
+void ATrooper::MoveTrooper_Implementation(FVector const NewPos) {
     TargetLocation = NewPos;
     bIsMoving = true;
     ActionPoints -= (NewPos - CurrentLocation).Size() * MoveCost;
@@ -158,7 +159,7 @@ void ATrooper::GetLifetimeReplicatedProps(
     DOREPLIFETIME(ATrooper, CurrentAbilityDestination);
 }
 
-uint8 ATrooper::GetPlayerIndex() const {
+int8 ATrooper::GetPlayerIndex() const {
     return PlayerIndex;
 }
 
@@ -225,8 +226,10 @@ void ATrooper::UpdateSelectionRadius(uint8 ActionType) const {
         {radiusScale, radiusScale, 0.01f});
 }
 
-void ATrooper::HighlightAsEnemy_Implementation() const {
-    SelectionStaticMesh->SetVisibility(true);
+void ATrooper::HighlightAsEnemy_Implementation(int8 Index) const {
+    if (PlayerIndex != Index) {
+        SelectionStaticMesh->SetVisibility(true);
+    }
 }
 
 void ATrooper::ResetActionPoints() {
@@ -244,17 +247,18 @@ UAbility *ATrooper::GetAbility(int AbilityIndex) const {
     }
 }
 
-bool ATrooper::TakeDamage(float Damage) {
-    if (bIsTakingDamage) {
-        return false;
+void ATrooper::TakeDamage_Implementation(float Damage) {
+    if (bIsTakingDamage || bIsDead) {
+        return;
     }
     HitPoints = FMath::Max<float>(0, HitPoints - Damage);
     if (HitPoints == 0) {
         bIsDead = true;
-        return true;
+        SetLifeSpan(DyingAnimationDuration);
+        GetWorld()->GetGameState<AMyGameState>()->DecreaseLivingTroopers(PlayerIndex);
+    } else {
+        bIsTakingDamage = true;
     }
-    bIsTakingDamage = true;
-    return false;
 }
 
 TSubclassOf<AMyProjectile> ATrooper::GetProjectileClass(
@@ -310,7 +314,7 @@ int ATrooper::GetAnimationValue() {
     return 0;
 }
 
-void ATrooper::Attack(int AbilityIndex, FVector ToLocation) {
+void ATrooper::Attack_Implementation(int AbilityIndex, FVector ToLocation) {
     bIsAttacking = true;
     bIsWaitingForFire = true;
     ActionPoints -= GetAbility(AbilityIndex)->ActionCost;

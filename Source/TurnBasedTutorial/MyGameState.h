@@ -21,7 +21,7 @@ public:
     void AddTrooper(ATrooper *Trooper);
 
     UFUNCTION(Server, Reliable)
-    void StartGame() const;
+    void StartGame();
     
     UFUNCTION(BlueprintCallable, Server, Reliable)
     void CycleTurns();
@@ -38,9 +38,24 @@ public:
     UFUNCTION()
     bool IsInTurn(uint8 PlayerIndex) const;
 
+    UFUNCTION()
+    bool IsGameStarted() const;
+
+    UFUNCTION()
+    void DecreaseLivingTroopers(int PlayerIndex);
+
 private:
     UPROPERTY(Replicated)
+    bool bGameIsOver = false;
+    
+    UPROPERTY(Replicated)
     TArray<ATrooper *> Troopers;
+
+    UPROPERTY(Replicated)
+    TArray<int> LivingTroopers;
+
+    UPROPERTY(Replicated)
+    bool bGameStarted = false;
 
     UPROPERTY(Replicated)
     uint8 CurrentPlayerTurn{0};

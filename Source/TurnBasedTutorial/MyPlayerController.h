@@ -12,6 +12,8 @@ class TURNBASEDTUTORIAL_API AMyPlayerController : public APlayerController {
     GENERATED_BODY()
 
 public:
+    virtual void BeginPlay() override;
+    
     // FOnMyTurnChangedDelegate OnMyTurnChanged;
     
     virtual void SetupInputComponent() override;
@@ -49,6 +51,9 @@ public:
     // void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
     
 private:
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<UUserWidget> WidgetClass;
+    
     // UPROPERTY(Replicated)
     // bool bIsMyTurn;
     //
