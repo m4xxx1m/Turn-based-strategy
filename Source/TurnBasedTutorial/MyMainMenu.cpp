@@ -15,7 +15,7 @@ void UMyMainMenu::NativeConstruct()
 
 void UMyMainMenu::OnHostOnlineGameButtonClicked()
 {
-	GetMyGameSubsystem()->CreateSession(2, true);
+	GetMyGameSubsystem()->CreateSession(1, true);
 	UGameplayStatics::OpenLevel(GetWorld(), FName(TEXT("BattleFieldMap")));
 	this->RemoveFromParent();
 }

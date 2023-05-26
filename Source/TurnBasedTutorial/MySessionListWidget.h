@@ -26,10 +26,19 @@ protected:
 	class UButton* GoBackToMainMenuButton;
 
 	UPROPERTY(meta = (BindWidget))
-	class UListView* AvailableSessionsList;
+	class UButton* RefreshListButton;
+	
+	UPROPERTY(meta = (BindWidget))
+	class UVerticalBox* SessionListBox;
 
-	void FillSessionListFromDelegate(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bSuccessful);
-
+	UPROPERTY(EditDefaultsOnly, Category="Session Info Class")
+	TSubclassOf<class UMySessionListEntryWidget> EntryClass;
+	
+	void RefreshList(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bSuccessful);
+	
 private:
-	UMyGameInstanceSubsystem* GetMyGameSubsystem() const;	
+	UMyGameInstanceSubsystem* GetMyGameSubsystem() const;
+
+	UFUNCTION()
+	void OnRefreshListButtonClicked();
 };
