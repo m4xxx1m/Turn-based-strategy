@@ -15,16 +15,18 @@ class TURNBASEDTUTORIAL_API AMyGameState : public AGameState {
     GENERATED_BODY()
 
 public:
+    AMyGameState();
+    
     virtual void BeginPlay() override;
     
     UFUNCTION(Server, Reliable)
-    void AddTrooper(ATrooper *Trooper);
+    virtual void AddTrooper(ATrooper *Trooper);
 
     UFUNCTION(Server, Reliable)
     void StartGame();
     
     UFUNCTION(BlueprintCallable, Server, Reliable)
-    void CycleTurns();
+    virtual void CycleTurns();
 
     UFUNCTION(BlueprintPure)
     AMyPlayerState *PlayerInTurn() const;
@@ -44,7 +46,10 @@ public:
     UFUNCTION()
     void DecreaseLivingTroopers(int PlayerIndex);
 
-private:
+protected:
+    UPROPERTY()
+    bool IsMultiplayer = true;
+    
     UPROPERTY(Replicated)
     bool bGameIsOver = false;
     
@@ -52,7 +57,7 @@ private:
     TArray<ATrooper *> Troopers;
 
     UPROPERTY(Replicated)
-    TArray<int> LivingTroopers;
+    TArray<int> LivingTroopersCount;
 
     UPROPERTY(Replicated)
     bool bGameStarted = false;

@@ -4,7 +4,6 @@
 #include "MyExplosion.h"
 
 #include "Trooper.h"
-#include "Components/SphereComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Particles/ParticleSystemComponent.h"
 
@@ -51,7 +50,7 @@ void AMyExplosion::NotifyActorBeginOverlap(AActor *OtherActor) {
                PlayerIndex);
         if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
             GetPlayerIndex()) {
-            OtherTrooper->TakeDamage(Damage);
+            OtherTrooper->TrooperTakeDamage(Damage);
         }
     } else {
         UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));

@@ -33,8 +33,7 @@ public:
     UFUNCTION(Server, Reliable)
     void Attack(ATrooper *Attacker,
                 FVector Location,
-                int ActionIndex,
-                const TArray<ATrooper *> &Troopers);
+                int ActionIndex);
 
     // UFUNCTION(Client, Reliable)
     // void CycleTurns() const;

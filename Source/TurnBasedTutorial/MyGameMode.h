@@ -27,7 +27,7 @@ public:
     // UFUNCTION(BlueprintCallable)
     // void CycleTurns();
 
-private:
+protected:
     void InitializeSpawnPointsIfNeeded(AController *Player);
 
     UFUNCTION(Server, Reliable)

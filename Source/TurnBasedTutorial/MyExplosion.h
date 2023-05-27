@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include "Components/SphereComponent.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "MyExplosion.generated.h"

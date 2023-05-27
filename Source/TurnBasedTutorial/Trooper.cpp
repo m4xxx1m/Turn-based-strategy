@@ -3,8 +3,6 @@
 
 #include "HealthBar.h"
 #include "MyGameState.h"
-#include "MyPlayerController.h"
-#include "MyPlayerState.h"
 #include "MyProjectile.h"
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -89,14 +87,16 @@ void ATrooper::Tick(float const DeltaTime) {
         }
         if (AttackPlayedTime >= AttackDuration) {
             AttackPlayedTime = 0.0f;
-            bIsAttacking = false;
+            // bIsAttacking = false;
+            SetIsAttacking(false);
         }
     }
     if (bIsTakingDamage) {
         TakingDamagePlayedTime += DeltaTime;
         if (TakingDamagePlayedTime >= TakingDamageDuration) {
             TakingDamagePlayedTime = 0.0f;
-            bIsTakingDamage = false;
+            // bIsTakingDamage = false;
+            SetIsTakingDamage(false);
         }
     }
     if (bIsMoving) {
@@ -106,11 +106,48 @@ void ATrooper::Tick(float const DeltaTime) {
         if (PositionVector.Size() >= (TargetLocation - CurrentLocation).
             Size()) {
             CurrentLocation = TargetLocation;
-            bIsMoving = false;
+            // bIsMoving = false;
+            SetIsMoving(false);
         } else {
             CurrentLocation += PositionVector;
         }
         SetActorLocation(CurrentLocation);
+    }
+}
+
+void ATrooper::SetIsAttacking(bool IsAttacking) {
+    bIsAttacking = IsAttacking;
+    if (IsAttacking) {
+        SetActorTickEnabled(true);
+    } else {
+        TryDisableTick();
+    }
+}
+
+void ATrooper::SetIsTakingDamage(bool IsTakingDamage) {
+    bIsTakingDamage = IsTakingDamage;
+    if (IsTakingDamage) {
+        SetActorTickEnabled(true);
+    } else {
+        TryDisableTick();
+    }
+}
+
+void ATrooper::SetIsMoving(bool IsMoving) {
+    bIsMoving = IsMoving;
+    if (IsMoving) {
+        SetActorTickEnabled(true);
+    } else {
+        TryDisableTick();
+    }
+}
+
+void ATrooper::TryDisableTick() {
+    if (!bIsAttacking && !bIsTakingDamage && !bIsMoving) {
+        SetActorTickEnabled(false);
+        if (AIController && AIController->IsValidLowLevel()) {
+            AIController->ActionDone();
+        }
     }
 }
 
@@ -131,7 +168,8 @@ void ATrooper::Tick(float const DeltaTime) {
 
 void ATrooper::MoveTrooper_Implementation(FVector const NewPos) {
     TargetLocation = NewPos;
-    bIsMoving = true;
+    // bIsMoving = true;
+    SetIsMoving(true);
     ActionPoints -= (NewPos - CurrentLocation).Size() * MoveCost;
 }
 
@@ -196,6 +234,17 @@ float ATrooper::GetActionRadius(int action) const {
     }
 }
 
+float ATrooper::GetRealActionRadius(int action) const {
+    switch (action) {
+        case 1:
+            return AttackAbility->ActionRadius;
+        case 2:
+            return SpecialAbility->ActionRadius;
+        default:
+            return ActionPoints / MoveCost;
+    }
+}
+
 float ATrooper::GetHitPoints() const {
     return HitPoints;
 }
@@ -247,7 +296,15 @@ UAbility *ATrooper::GetAbility(int AbilityIndex) const {
     }
 }
 
-void ATrooper::TakeDamage_Implementation(float Damage) {
+void ATrooper::SetAIPossession(AEnemyAIController *EnemyController) {
+    AIController = EnemyController;
+}
+
+bool ATrooper::IsDead() const {
+    return bIsDead;
+}
+
+void ATrooper::TrooperTakeDamage_Implementation(float Damage) {
     if (bIsTakingDamage || bIsDead) {
         return;
     }
@@ -257,7 +314,8 @@ void ATrooper::TakeDamage_Implementation(float Damage) {
         SetLifeSpan(DyingAnimationDuration);
         GetWorld()->GetGameState<AMyGameState>()->DecreaseLivingTroopers(PlayerIndex);
     } else {
-        bIsTakingDamage = true;
+        // bIsTakingDamage = true;
+        SetIsTakingDamage(true);
     }
 }
 
@@ -315,7 +373,8 @@ int ATrooper::GetAnimationValue() {
 }
 
 void ATrooper::Attack_Implementation(int AbilityIndex, FVector ToLocation) {
-    bIsAttacking = true;
+    // bIsAttacking = true;
+    SetIsAttacking(true);
     bIsWaitingForFire = true;
     ActionPoints -= GetAbility(AbilityIndex)->ActionCost;
     CurrentAbilityIndex = AbilityIndex;

@@ -1,8 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "MyPlayerState.h"
-
 #include "MyGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -81,9 +79,7 @@ void AMyPlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
 
 void AMyPlayerState::Attack_Implementation(ATrooper *Attacker,
                                            FVector Location,
-                                           int ActionIndex,
-                                           const TArray<ATrooper *> &
-                                           Troopers) {
+                                           int ActionIndex) {
     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
         Attacker->Attack(ActionIndex, Location);
         // for (const auto Trooper : Troopers) {
@@ -169,7 +165,7 @@ void AMyPlayerState::OnPlayerAction(const FHitResult &HitResult) {
                     // ATTACK! ATTACK!
                     UE_LOG(LogTemp, Warning, TEXT("Do attack"));
                     Attack(SelectedTrooper, NewlySelectedLocation,
-                           CurrentAction, GetMyGameState()->GetTroopers());
+                           CurrentAction);
                     SelectedTrooper->SetSelection(false, CurrentAction);
                     SelectedTrooper = nullptr;
                     break;

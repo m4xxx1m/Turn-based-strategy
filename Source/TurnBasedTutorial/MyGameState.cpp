@@ -10,20 +10,27 @@ auto AMyGameState::GetMyPlayerState(uint8 PlayerIndex) const {
     return Cast<AMyPlayerState>(PlayerArray[PlayerIndex]);
 }
 
+AMyGameState::AMyGameState() : Super() {
+}
+
 void AMyGameState::BeginPlay() {
     Super::BeginPlay();
-    LivingTroopers.SetNum(2);
+    LivingTroopersCount.SetNum(2);
 }
 
 void AMyGameState::AddTrooper_Implementation(ATrooper *Trooper) {
-    if (Trooper->GetPlayerIndex() >= 0 && Trooper->GetPlayerIndex() <= LivingTroopers.Num()) {
-        LivingTroopers[Trooper->GetPlayerIndex()]++;
+    if (Trooper->GetPlayerIndex() >= 0 && Trooper->GetPlayerIndex() <=
+        LivingTroopersCount.Num()) {
+        if (LivingTroopersCount.Num() < 2) {
+            LivingTroopersCount.SetNum(2);
+        }
+        LivingTroopersCount[Trooper->GetPlayerIndex()]++;
     }
     Troopers.Add(Trooper);
 }
 
 void AMyGameState::StartGame_Implementation() {
-    PlayerNotInTurn()->SetEnemySelection();
+    // PlayerNotInTurn()->SetEnemySelection();
     PlayerInTurn()->SetEnemySelection();
     bGameStarted = true;
     PlayerInTurn()->StartTurn();
@@ -75,9 +82,9 @@ bool AMyGameState::IsGameStarted() const {
 
 void AMyGameState::DecreaseLivingTroopers(int PlayerIndex) {
     if (bGameIsOver)
-         return;
-    LivingTroopers[PlayerIndex]--;
-    if (LivingTroopers[PlayerIndex] <= 0) {
+        return;
+    LivingTroopersCount[PlayerIndex]--;
+    if (LivingTroopersCount[PlayerIndex] <= 0) {
         UE_LOG(LogTemp, Warning, TEXT("Player %d lose!"), PlayerIndex);
         bGameIsOver = true;
     }

@@ -12,6 +12,7 @@ AMyPlayerController::AMyPlayerController()
     : Super()/*, bIsMyTurn(false), SelectedTrooper(nullptr)*/ {
     UE_LOG(LogTemp, Warning, TEXT("Player controller created"));
     SetShowMouseCursor(true);
+    PlayerIndex = 0;
 }
 
 void AMyPlayerController::BeginPlay() {

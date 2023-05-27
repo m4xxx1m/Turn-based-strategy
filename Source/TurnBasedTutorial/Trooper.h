@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Ability.h"
+#include "EnemyAIController.h"
 #include "GameFramework/Character.h"
 #include "Trooper.generated.h"
 
@@ -45,6 +46,9 @@ public:
     float GetActionRadius(int action) const;
 
     UFUNCTION()
+    float GetRealActionRadius(int action) const;
+
+    UFUNCTION()
     float GetHitPoints() const;
 
     UFUNCTION()
@@ -66,10 +70,19 @@ public:
     UAbility *GetAbility(int AbilityIndex) const;
 
     UFUNCTION(Server, Reliable)
-    void TakeDamage(float Damage);
+    void TrooperTakeDamage(float Damage);
+
+    UFUNCTION()
+    void SetAIPossession(AEnemyAIController *EnemyController);
+
+    UFUNCTION()
+    bool IsDead() const;
 
 protected:
     constexpr static float PIXELS_IN_RADIUS = 50;
+
+    UPROPERTY()
+    AEnemyAIController *AIController = nullptr;
     
     UPROPERTY(EditAnywhere)
     UMaterialInterface *GreenMaterial = nullptr;
@@ -179,6 +192,14 @@ protected:
 
     UPROPERTY(Replicated)
     bool bIsMoving = false;
+
+    void SetIsAttacking(bool IsAttacking);
+
+    void SetIsTakingDamage(bool IsTakingDamage);
+
+    void SetIsMoving(bool IsMoving);
+
+    void TryDisableTick();
 };
 
 // UCLASS()
