@@ -8,7 +8,7 @@
 AEnemyAIController::AEnemyAIController()
     : Super() {
     PrimaryActorTick.bCanEverTick = true;
-    SetActorTickInterval(0.3f);
+    SetActorTickInterval(2.0f);
 }
 
 void AEnemyAIController::Tick(float DeltaSeconds) {
@@ -42,6 +42,67 @@ void AEnemyAIController::ActionDone() {
 
 bool AEnemyAIController::IsAITurn() const {
     return bIsAITurn;
+}
+
+void AEnemyAIController::SpawnIfNeeded() {
+    RemoveDeadTroopers();
+    while (PossessedTroopers.Num() < MAX_TROOPERS_COUNT) {
+        const FVector Location = GetFreeLocation();
+        const FVector Rotation = {0.0f, 0.0f, 0.0f};
+        FTransform SpawnLocationAndRotation(Rotation);
+        SpawnLocationAndRotation.SetLocation(Location);
+        const TArray<TSubclassOf<ATrooper>> &LoadedTroopersAssets = GetWorld()->
+            GetGameState<ASinglePlayerGS>()->GetTroopersAssets();
+        AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+            LoadedTroopersAssets[FMath::RandRange(
+                0, LoadedTroopersAssets.Num() - 1)],
+            SpawnLocationAndRotation);
+        Cast<ATrooper>(Spawned)->Initialize(
+            1, Location, TroopersCount++);
+        Spawned->FinishSpawning(SpawnLocationAndRotation);
+        Spawned->SetActorLocation(Location);
+        ATrooper *Trooper = Cast<ATrooper>(Spawned);
+        GetWorld()->GetGameState<ASinglePlayerGS>()->AddTrooper(Trooper);
+        PossessedTroopers.Add(Trooper);
+        Trooper->SetAIPossession(this);
+        Trooper->HighlightAsEnemy(PLAYER_INDEX);
+    }
+}
+
+// void AEnemyAIController::SetTrooperAssetsAndSpawn(
+// TArray<UClass *> TrooperAssets,
+// int TrooperCount) {
+// LoadedTrooperAssets = MoveTemp(TrooperAssets);
+// TroopersCount = TrooperCount;
+// SpawnIfNeeded();
+// }
+
+void AEnemyAIController::RemoveDeadTroopers() {
+    for (int index = 0; index < PossessedTroopers.Num(); ++index) {
+        if (!PossessedTroopers[index] || !PossessedTroopers[index]->
+            IsValidLowLevel() ||
+            PossessedTroopers[index]->IsDead()) {
+            PossessedTroopers.RemoveAtSwap(index);
+            index--;
+        }
+    }
+}
+
+FVector AEnemyAIController::GetFreeLocation() const {
+    for (const auto Location : SpawnPoints) {
+        bool bIsClose = false;
+        for (const auto Trooper : PossessedTroopers) {
+            if ((Location - Trooper->GetLocation()).Size() < 100.0f) {
+                bIsClose = true;
+                break;
+            }
+        }
+        if (bIsClose) {
+            continue;
+        }
+        return Location;
+    }
+    return {-2000.0f, FMath::RandRange(-2000.0f, 2000.0f), 0.0f};
 }
 
 void AEnemyAIController::MakeMove() {
@@ -111,6 +172,17 @@ bool AEnemyAIController::MoveTo(int TrooperIndex) {
     return true;
 }
 
+void AEnemyAIController::InitializeSpawnPoints() {
+    SpawnPoints.Add(FVector{
+        -2000.0f,
+        -(MAX_TROOPERS_COUNT - 1) * TROOPERS_DISTANCE.Y / 2,
+        0.0f
+    });
+    for (int index = 1; index < MAX_TROOPERS_COUNT; ++index) {
+        SpawnPoints.Add(SpawnPoints[SpawnPoints.Num() - 1] + TROOPERS_DISTANCE);
+    }
+}
+
 int AEnemyAIController::GetClosestTrooper() const {
     float minDistance = 1000000.0f;
     int minIndex = 0;
@@ -142,6 +214,8 @@ void AEnemyAIController::InitializeTroopers(
             }
         }
     }
+    InitializeSpawnPoints();
+    SpawnIfNeeded();
 }
 
 void AEnemyAIController::BeginPlay() {

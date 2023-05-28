@@ -5,6 +5,7 @@
 
 ASinglePlayerGM::ASinglePlayerGM() : Super() {
     GameStateClass = ASinglePlayerGS::StaticClass();
+    bIsMultiplayer = false;
 }
 
 void ASinglePlayerGM::BeginPlay() {

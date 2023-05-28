@@ -84,6 +84,9 @@ void AMyGameState::DecreaseLivingTroopers(int PlayerIndex) {
     if (bGameIsOver)
         return;
     LivingTroopersCount[PlayerIndex]--;
+    if (!bIsMultiplayer && PlayerIndex == 1) {
+        return;
+    }
     if (LivingTroopersCount[PlayerIndex] <= 0) {
         UE_LOG(LogTemp, Warning, TEXT("Player %d lose!"), PlayerIndex);
         bGameIsOver = true;

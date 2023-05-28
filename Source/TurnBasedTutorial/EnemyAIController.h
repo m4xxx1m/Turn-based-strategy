@@ -13,8 +13,6 @@ class TURNBASEDTUTORIAL_API AEnemyAIController : public AActor {
     GENERATED_BODY()
 
 public:
-    static constexpr int AI_INDEX = 1;
-    
     AEnemyAIController();
 
     UFUNCTION()
@@ -39,7 +37,30 @@ public:
     UFUNCTION()
     bool IsAITurn() const;
 
+    UFUNCTION()
+    void SpawnIfNeeded();
+
+    // UFUNCTION()
+    // void SetTrooperAssetsAndSpawn(TArray<UClass *> TrooperAssets, int TrooperCount);
+
 private:
+    static constexpr int AI_INDEX = 1;
+
+    static constexpr int PLAYER_INDEX = 0;
+
+    static constexpr int MAX_TROOPERS_COUNT = 3;
+
+    UPROPERTY()
+    int TroopersCount = 5;
+
+    // UPROPERTY()
+    // TArray<UClass *> LoadedTrooperAssets;
+
+    UFUNCTION()
+    void RemoveDeadTroopers();
+    
+    FVector GetFreeLocation() const;
+    
     UFUNCTION()
     void MakeMove();
     
@@ -53,6 +74,8 @@ private:
     bool TryAttack(int TrooperIndex);
 
     bool MoveTo(int TrooperIndex);
+
+    void InitializeSpawnPoints();
     
     UPROPERTY()
     bool bIsAITurn = false;
@@ -65,4 +88,8 @@ private:
 
     UPROPERTY()
     TArray<ATrooper *> PlayerTroopers;
+
+    TArray<FVector> SpawnPoints;
+
+    const FVector TROOPERS_DISTANCE = {0.0f, 1000.0f, 0.0f};
 };

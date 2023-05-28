@@ -23,7 +23,14 @@ public:
 
     virtual void Tick(float DeltaSeconds) override;
 
+    AEnemyAIController *GetEnemyAIController() const;
+
+    const TArray<TSubclassOf<ATrooper>> &GetTroopersAssets() const;
+
 protected:
     UPROPERTY(Replicated)
     AEnemyAIController *EnemyAiManager = nullptr;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<TSubclassOf<ATrooper>> TrooperBpAssets;
 };

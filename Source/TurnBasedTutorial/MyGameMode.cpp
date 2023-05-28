@@ -6,6 +6,7 @@
 #include "MyGameState.h"
 #include "MyPlayerController.h"
 #include "MyPlayerState.h"
+#include "SinglePlayerGS.h"
 #include "Trooper.h"
 
 AMyGameMode::AMyGameMode()
@@ -26,7 +27,7 @@ auto AMyGameMode::GetMyGameState() const {
 }
 
 
-void AMyGameMode::InitializeBattleField_Implementation() const {
+void AMyGameMode::InitializeBattleField_Implementation() {
     UE_LOG(LogTemp, Warning, TEXT("InitializeBattleField"));
     FVector Location(2000.0f, -1000.0f, 0.0f);
     FRotator Rotation(0.0f, 180.0f, 0.0f);
@@ -39,7 +40,7 @@ void AMyGameMode::InitializeBattleField_Implementation() const {
         ),
         TEXT("Blueprint'/Game/Troopers/TrooperWizard.TrooperWizard_C'")
     };
-    TArray<UClass *> LoadedBpAssets;
+    // TArray<UClass *> LoadedBpAssets;
     for (int i = 0; i < bpPaths.Num(); ++i) {
         TSoftClassPtr<ATrooper> ActorBpClass = TSoftClassPtr<ATrooper>(
             FSoftObjectPath(bpPaths[i])
@@ -61,24 +62,30 @@ void AMyGameMode::InitializeBattleField_Implementation() const {
         GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
         Location += {0.f, 500.f, 0.0f};
     }
-    Location = {-2000.0f, -1000.0f, 0.0f};
-    Rotation = {0.0f, 0.0f, 0.0f};
-    for (int i = 0; i < 5; ++i) {
-        FTransform SpawnLocationAndRotation(Rotation);
-        SpawnLocationAndRotation.SetLocation(Location);
-        AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
-            LoadedBpAssets[i % 2], SpawnLocationAndRotation);
-        // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
-        //     ATrooper::StaticClass(), SpawnLocationAndRotation);
-        Cast<ATrooper>(Spawned)->Initialize(
-            1, Location, TrooperCount++);
-        Spawned->FinishSpawning(SpawnLocationAndRotation);
-        Spawned->SetActorLocation(Location);
-        GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
-        Location += {0.f, 500.f, 0.0f};
+    if (bIsMultiplayer) {
+        Location = {-2000.0f, -1000.0f, 0.0f};
+        Rotation = {0.0f, 0.0f, 0.0f};
+        for (int i = 0; i < 5; ++i) {
+            FTransform SpawnLocationAndRotation(Rotation);
+            SpawnLocationAndRotation.SetLocation(Location);
+            AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+                LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+            // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
+            //     ATrooper::StaticClass(), SpawnLocationAndRotation);
+            Cast<ATrooper>(Spawned)->Initialize(
+                1, Location, TrooperCount++);
+            Spawned->FinishSpawning(SpawnLocationAndRotation);
+            Spawned->SetActorLocation(Location);
+            GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
+            Location += {0.f, 500.f, 0.0f};
+        }
+    } else {
+        // Cast<ASinglePlayerGS>(GetMyGameState())->GetEnemyAIController()->
+                                                 // SetTrooperAssetsAndSpawn(
+                                                     // LoadedBpAssets,
+                                                     // TrooperCount);
     }
 }
-
 
 AActor *AMyGameMode::ChoosePlayerStart_Implementation(AController *Player) {
     UE_LOG(LogTemp, Warning, TEXT("GameMode ChoosePlayerStart %d"),
@@ -151,7 +158,7 @@ void AMyGameMode::StartGame_Implementation() {
     InitializeBattleField();
     // PlayerNotInTurn()->SetEnemySelection(Troopers);
     // PlayerInTurn()->SetEnemySelection(Troopers);
-    
+
     // PlayerInTurn()->StartTurn();
     GetMyGameState()->StartGame();
 }
@@ -206,4 +213,3 @@ void AMyGameMode::StartGame_Implementation() {
 //     return Cast<AMyPlayerController>(
 //         UGameplayStatics::GetPlayerController(GetWorld(), PlayerIndex));
 // }
-

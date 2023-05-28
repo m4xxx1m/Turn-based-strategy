@@ -48,7 +48,7 @@ public:
 
 protected:
     UPROPERTY()
-    bool IsMultiplayer = true;
+    bool bIsMultiplayer = true;
     
     UPROPERTY(Replicated)
     bool bGameIsOver = false;

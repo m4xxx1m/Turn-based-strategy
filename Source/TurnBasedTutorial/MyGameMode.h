@@ -28,10 +28,16 @@ public:
     // void CycleTurns();
 
 protected:
+    UPROPERTY()
+    TArray<UClass *> LoadedBpAssets;
+    
+    UPROPERTY()
+    bool bIsMultiplayer = true;
+    
     void InitializeSpawnPointsIfNeeded(AController *Player);
 
     UFUNCTION(Server, Reliable)
-    void InitializeBattleField() const;
+    void InitializeBattleField();
 
     UPROPERTY()
     TMap<uint8, AMyPlayerStart *> SpawnPoints{};

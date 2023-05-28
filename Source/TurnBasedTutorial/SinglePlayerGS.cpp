@@ -5,7 +5,7 @@
 
 ASinglePlayerGS::ASinglePlayerGS()
     : Super() {
-    IsMultiplayer = false;
+    bIsMultiplayer = false;
     PrimaryActorTick.bCanEverTick = true;
     SetActorTickInterval(0.5f);
 }
@@ -43,10 +43,20 @@ void ASinglePlayerGS::Tick(float DeltaSeconds) {
     Super::Tick(DeltaSeconds);
     if (EnemyAiManager->bIsEnded) {
         EnemyAiManager->bIsEnded = false;
+        EnemyAiManager->SpawnIfNeeded();
         CycleTurns();
     } else if (CurrentPlayerTurn == 1 && !EnemyAiManager->IsAITurn()) {
         CycleTurns();
     }
+}
+
+AEnemyAIController * ASinglePlayerGS::GetEnemyAIController() const {
+    return EnemyAiManager;
+}
+
+const TArray<TSubclassOf<ATrooper>> & ASinglePlayerGS::
+GetTroopersAssets() const {
+    return TrooperBpAssets;
 }
 
 void ASinglePlayerGS::GetLifetimeReplicatedProps(
