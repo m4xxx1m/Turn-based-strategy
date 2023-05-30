@@ -117,6 +117,9 @@ void AEnemyAIController::MakeMove() {
             return;
         }
         const int Index = GetClosestTrooper();
+        if (Index == -1) {
+            return;
+        }
         bool failed;
         if (!IsCloseEnough(Index)) {
             failed = MoveTo(Index);
@@ -185,7 +188,7 @@ void AEnemyAIController::InitializeSpawnPoints() {
 
 int AEnemyAIController::GetClosestTrooper() const {
     float minDistance = 1000000.0f;
-    int minIndex = 0;
+    int minIndex = -1;
     const ATrooper *CurrentTrooper = PossessedTroopers[TroopersCursor];
     for (int index = 0; index < PlayerTroopers.Num(); ++index) {
         const ATrooper *OtherTrooper = PlayerTroopers[index];

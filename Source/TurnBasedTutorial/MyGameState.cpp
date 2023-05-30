@@ -2,8 +2,10 @@
 
 #include "MyGameState.h"
 
+// #include "GameOverWidget.h"
 #include "MyPlayerState.h"
 #include "Trooper.h"
+#include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
 
 auto AMyGameState::GetMyPlayerState(uint8 PlayerIndex) const {
@@ -90,8 +92,23 @@ void AMyGameState::DecreaseLivingTroopers(int PlayerIndex) {
     if (LivingTroopersCount[PlayerIndex] <= 0) {
         UE_LOG(LogTemp, Warning, TEXT("Player %d lose!"), PlayerIndex);
         bGameIsOver = true;
+        GameOver(PlayerIndex);
     }
 }
+
+void AMyGameState::GameOver(int PlayerIndexLose) const {
+    Cast<AMyPlayerState>(PlayerArray[0])->GameOver(PlayerIndexLose);
+    if (bIsMultiplayer) {
+        Cast<AMyPlayerState>(PlayerArray[1])->GameOver(PlayerIndexLose);
+    }
+}
+
+// void AMyGameState::GameOver_Implementation(int PlayerIndexLose) {
+//     UGameOverWidget *CreatedWidget = CreateWidget<UGameOverWidget>(
+//         GetWorld(), GameOverWidgetClass);
+//     CreatedWidget->AddToViewport();
+//     CreatedWidget->SetWidgetText(PlayerIndexLose != );
+// }
 
 
 void AMyGameState::GetLifetimeReplicatedProps(

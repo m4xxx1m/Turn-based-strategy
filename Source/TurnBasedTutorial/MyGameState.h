@@ -45,8 +45,14 @@ public:
 
     UFUNCTION()
     void DecreaseLivingTroopers(int PlayerIndex);
+    
+    UFUNCTION()
+    void GameOver(int PlayerIndexLose) const;
 
 protected:
+    // UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    // TSubclassOf<UUserWidget> GameOverWidgetClass;
+    
     UPROPERTY()
     bool bIsMultiplayer = true;
     

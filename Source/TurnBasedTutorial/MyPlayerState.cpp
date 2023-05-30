@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "MyPlayerState.h"
+
+#include "GameOverWidget.h"
 #include "MyGameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
@@ -35,6 +37,13 @@ auto AMyPlayerState::GetMyGameState() const {
 
 void AMyPlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
+}
+
+void AMyPlayerState::GameOver_Implementation(int PlayerLoseIndex) {
+    UGameOverWidget *CreatedWidget = CreateWidget<UGameOverWidget>(
+        GetWorld(), GameOverWidgetClass);
+    CreatedWidget->AddToViewport();
+    CreatedWidget->SetWidgetText(PlayerLoseIndex != PlayerIndex);
 }
 
 void AMyPlayerState::SetEnemySelection_Implementation(

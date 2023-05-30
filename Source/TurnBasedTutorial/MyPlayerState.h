@@ -56,7 +56,13 @@ public:
     UFUNCTION(Client, Reliable)
     void SetEnemySelection(/*const TArray<AActor *> &Troopers*/) const;
 
-private:
+    UFUNCTION(Client, Reliable)
+    void GameOver(int PlayerLoseIndex);
+
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TSubclassOf<UUserWidget> GameOverWidgetClass;
+    
     UPROPERTY(Replicated)
     bool bIsSelectionInitialized = false;
     
