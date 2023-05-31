@@ -48,6 +48,10 @@ public:
 
 	void JoinSession(const FOnlineSessionSearchResult& SessionSearchResult);
 
+	void JoinSession(const int32 Index);
+
+	bool TryConnectToCurrentSession() const;
+	
 	FMyOnCreateSessionComplete OnCreateSessionCompleteEvent;
 	FMyOnUpdateSessionComplete OnUpdateSessionCompleteEvent;
 	FMyOnStartSessionCompete OnStartSessionCompleteEvent;
@@ -70,8 +74,6 @@ protected:
 	void OnFindSessionsCompleted(bool bSuccessful);
 
 	void OnJoinSessionCompleted(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
-
-	bool TryConnectToCurrentSession() const;
 
 private:
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;

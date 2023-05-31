@@ -35,10 +35,15 @@ protected:
 	TSubclassOf<class UMySessionListEntryWidget> EntryClass;
 	
 	void RefreshList(const TArray<FOnlineSessionSearchResult>& SessionResults, bool bSuccessful);
+
+	void OnJoinSessionSuccess(EOnJoinSessionCompleteResult::Type Result);
 	
 private:
 	UMyGameInstanceSubsystem* GetMyGameSubsystem() const;
 
 	UFUNCTION()
 	void OnRefreshListButtonClicked();
+
+	UFUNCTION()
+	void ConnectToFirstSession();
 };

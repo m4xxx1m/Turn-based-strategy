@@ -11,14 +11,20 @@ void UMyMainMenu::NativeConstruct()
 	Super::NativeConstruct();
 
 	HostOnlineGameButton->OnClicked.AddDynamic(this, &ThisClass::UMyMainMenu::OnHostOnlineGameButtonClicked);
+
+	GetMyGameSubsystem()->OnCreateSessionCompleteEvent.AddDynamic(this, &ThisClass::StartSessionWhenCreatingSessonComplete);
 }	
 
 void UMyMainMenu::OnHostOnlineGameButtonClicked()
 {
-	GetMyGameSubsystem()->CreateSession(1, true);
-	UGameplayStatics::OpenLevel(GetWorld(), FName(TEXT("BattleFieldMap")));
-	this->RemoveFromParent();
+	GetMyGameSubsystem()->CreateSession(2, true);
 }
+
+void UMyMainMenu::StartSessionWhenCreatingSessonComplete(bool bSuccess)
+{
+	GetMyGameSubsystem()->StartSession();
+}
+
 
 UMyGameInstanceSubsystem* UMyMainMenu::GetMyGameSubsystem() const
 {
