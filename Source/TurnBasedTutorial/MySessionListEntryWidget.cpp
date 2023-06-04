@@ -11,8 +11,9 @@ void UMySessionListEntryWidget::Update(int SessionIndex, const FOnlineSessionSea
 {
 	SessionId = SessionIndex;
 	IndexText->SetText(FText::AsNumber(SessionIndex + 1));
-	// TODO: SessionNameText->SetText(FText::FromString(Session.Session.SessionSettings.Get(...)))
-	SessionNameText->SetText(FText::FromString("Test session name"));
+	
+	Session.Session.SessionSettings.Get(SETTING_MAPNAME, SessionName);
+	SessionNameText->SetText(FText::FromString(SessionName));
 
 	int MaxPlayerCount = Session.Session.SessionSettings.NumPublicConnections;
 	int CurPlayerCount = MaxPlayerCount - Session.Session.NumOpenPublicConnections;

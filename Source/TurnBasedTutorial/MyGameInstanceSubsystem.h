@@ -34,7 +34,7 @@ class TURNBASEDTUTORIAL_API UMyGameInstanceSubsystem : public UGameInstanceSubsy
 public:
 	UMyGameInstanceSubsystem();
 
-	void CreateSession(int32 NumPublicConnections, bool bIsLANMatch);
+	void CreateSession(FString SessionName, int32 NumPublicConnections, bool bIsLANMatch);
 
 	void UpdateSession();
 
@@ -51,6 +51,10 @@ public:
 	void JoinSession(const int32 Index);
 
 	bool TryConnectToCurrentSession() const;
+
+	void QuitCurrentSession();
+
+	void UpdateSessionName(FString NewSessionName);
 	
 	FMyOnCreateSessionComplete OnCreateSessionCompleteEvent;
 	FMyOnUpdateSessionComplete OnUpdateSessionCompleteEvent;
@@ -76,6 +80,8 @@ protected:
 	void OnJoinSessionCompleted(FName SessionName, EOnJoinSessionCompleteResult::Type Result);
 
 private:
+	bool bIsHost;
+	
 	FOnCreateSessionCompleteDelegate CreateSessionCompleteDelegate;
 	FDelegateHandle CreateSessionCompleteDelegateHandle;
 	TSharedPtr<FOnlineSessionSettings> LastSessionSettings;

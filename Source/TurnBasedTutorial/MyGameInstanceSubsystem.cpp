@@ -2,7 +2,9 @@
 
 #include "MyGameInstanceSubsystem.h"
 
+#include "MyPlayerController.h"
 #include "OnlineSubsystemUtils.h"
+#include "GameFramework/GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
 UMyGameInstanceSubsystem::UMyGameInstanceSubsystem() : CreateSessionCompleteDelegate(
@@ -25,12 +27,13 @@ UMyGameInstanceSubsystem::UMyGameInstanceSubsystem() : CreateSessionCompleteDele
 		                                                       this, &ThisClass::OnFindSessionsCompleted)),
                                                        JoinSessionCompleteDelegate(
 	                                                       FOnJoinSessionCompleteDelegate::CreateUObject(
-		                                                       this, &ThisClass::OnJoinSessionCompleted))
+		                                                       this, &ThisClass::OnJoinSessionCompleted)),
+                                                       bIsHost(false)
 {
 }
 
 
-void UMyGameInstanceSubsystem::CreateSession(int32 NumPublicConnections, bool bIsLANMatch)
+void UMyGameInstanceSubsystem::CreateSession(FString SessionName, int32 NumPublicConnections, bool bIsLANMatch)
 {
 	const IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
 	if (!SessionInterface.IsValid())
@@ -50,7 +53,7 @@ void UMyGameInstanceSubsystem::CreateSession(int32 NumPublicConnections, bool bI
 	LastSessionSettings->bIsLANMatch = bIsLANMatch;
 	LastSessionSettings->bShouldAdvertise = true;
 
-	LastSessionSettings->Set(SETTING_MAPNAME, FString("Your Level Name"),
+	LastSessionSettings->Set(SETTING_MAPNAME, SessionName,
 	                         EOnlineDataAdvertisementType::ViaOnlineService);
 
 	CreateSessionCompleteDelegateHandle = SessionInterface->AddOnCreateSessionCompleteDelegate_Handle(
@@ -73,6 +76,8 @@ void UMyGameInstanceSubsystem::OnCreateSessionCompleted(FName SessionName, bool 
 	{
 		SessionInterface->ClearOnCreateSessionCompleteDelegate_Handle(CreateSessionCompleteDelegateHandle);
 	}
+
+	bIsHost = true;
 
 	OnCreateSessionCompleteEvent.Broadcast(bSuccessful);
 }
@@ -150,7 +155,7 @@ void UMyGameInstanceSubsystem::OnStartSessionCompleted(FName SessionName, bool b
 	OnStartSessionCompleteEvent.Broadcast(bSuccessful);
 
 	// TODO: Move this from gameinstance subsystem. This should not be here.
-	UGameplayStatics::OpenLevel(GetWorld(),"BattleFieldMap", true, "listen");
+	UGameplayStatics::OpenLevel(GetWorld(), "BattleFieldMap", true, "listen");
 }
 
 
@@ -345,4 +350,19 @@ bool UMyGameInstanceSubsystem::TryConnectToCurrentSession() const
 	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 	PlayerController->ClientTravel(ConnectString, TRAVEL_Absolute);
 	return true;
+}
+
+void UMyGameInstanceSubsystem::QuitCurrentSession()
+{
+	if (bIsHost)
+	{
+		UGameplayStatics::GetGameMode(GetWorld())->ReturnToMainMenuHost();
+	}
+	else
+	{
+		APlayerController* LocalController = GEngine->GetFirstLocalPlayerController(GetWorld());
+		LocalController->ClientReturnToMainMenuWithTextReason(FText::FromString("Session ended"));
+	}
+	bIsHost = false;
+	DestroySession();
 }

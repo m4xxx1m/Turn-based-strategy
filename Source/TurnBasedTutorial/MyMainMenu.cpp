@@ -17,7 +17,7 @@ void UMyMainMenu::NativeConstruct()
 
 void UMyMainMenu::OnHostOnlineGameButtonClicked()
 {
-	GetMyGameSubsystem()->CreateSession(2, true);
+	GetMyGameSubsystem()->CreateSession("Lobby " + FString::FromInt(FMath::RandRange(1, 1e6)),2, true);
 }
 
 void UMyMainMenu::StartSessionWhenCreatingSessonComplete(bool bSuccess)
