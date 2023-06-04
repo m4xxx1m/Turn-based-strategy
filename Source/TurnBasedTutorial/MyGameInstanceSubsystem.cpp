@@ -3,6 +3,7 @@
 #include "MyGameInstanceSubsystem.h"
 
 #include "OnlineSubsystemUtils.h"
+#include "Kismet/GameplayStatics.h"
 
 UMyGameInstanceSubsystem::UMyGameInstanceSubsystem() : CreateSessionCompleteDelegate(
 	                                                       FOnCreateSessionCompleteDelegate::CreateUObject(
@@ -45,7 +46,6 @@ void UMyGameInstanceSubsystem::CreateSession(int32 NumPublicConnections, bool bI
 	LastSessionSettings->bAllowJoinInProgress = true;
 	LastSessionSettings->bAllowJoinViaPresence = true;
 	LastSessionSettings->bAllowJoinViaPresenceFriendsOnly = true;
-	LastSessionSettings->bIsDedicated = false;
 	LastSessionSettings->bUsesPresence = true;
 	LastSessionSettings->bIsLANMatch = bIsLANMatch;
 	LastSessionSettings->bShouldAdvertise = true;
@@ -147,8 +147,10 @@ void UMyGameInstanceSubsystem::OnStartSessionCompleted(FName SessionName, bool b
 	{
 		SessionInterface->ClearOnStartSessionCompleteDelegate_Handle(StartSessionCompleteDelegateHandle);
 	}
-
 	OnStartSessionCompleteEvent.Broadcast(bSuccessful);
+
+	// TODO: Move this from gameinstance subsystem. This should not be here.
+	UGameplayStatics::OpenLevel(GetWorld(),"BattleFieldMap", true, "listen");
 }
 
 
@@ -235,7 +237,7 @@ void UMyGameInstanceSubsystem::FindSessions(int32 MaxSearchResults, bool bIsLANQ
 	LastSessionSearch->bIsLanQuery = bIsLANQuery;
 
 	// Disable dedicated server search (maybe enable later, when dedicated server is implemented)
-	LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
+	// LastSessionSearch->QuerySettings.Set(SEARCH_PRESENCE, true, EOnlineComparisonOp::Equals);
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->FindSessions(*LocalPlayer->GetPreferredUniqueNetId(), LastSessionSearch.ToSharedRef()))
@@ -279,6 +281,33 @@ void UMyGameInstanceSubsystem::JoinSession(const FOnlineSessionSearchResult& Ses
 
 	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
 	if (!SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession, SessionSearchResult))
+	{
+		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
+
+		OnJoinSessionCompleteEvent.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
+	}
+}
+
+void UMyGameInstanceSubsystem::JoinSession(const int32 Index)
+{
+	const IOnlineSessionPtr SessionInterface = Online::GetSessionInterface(GetWorld());
+	if (!SessionInterface.IsValid())
+	{
+		OnJoinSessionCompleteEvent.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
+		return;
+	}
+	if (!LastSessionSearch.IsValid() || Index >= LastSessionSearch->SearchResults.Num())
+	{
+		OnJoinSessionCompleteEvent.Broadcast(EOnJoinSessionCompleteResult::UnknownError);
+		return;
+	}
+
+	JoinSessionCompleteDelegateHandle = SessionInterface->AddOnJoinSessionCompleteDelegate_Handle(
+		JoinSessionCompleteDelegate);
+
+	const ULocalPlayer* LocalPlayer = GetWorld()->GetFirstLocalPlayerFromController();
+	if (!SessionInterface->JoinSession(*LocalPlayer->GetPreferredUniqueNetId(), NAME_GameSession,
+	                                   LastSessionSearch->SearchResults[Index]))
 	{
 		SessionInterface->ClearOnJoinSessionCompleteDelegate_Handle(JoinSessionCompleteDelegateHandle);
 
