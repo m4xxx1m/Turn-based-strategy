@@ -22,6 +22,9 @@ void USessionListWidget::NativeConstruct() {
     MyGameInstanceSubsystem->OnJoinSessionCompleteEvent.AddUObject(
         this, &ThisClass::OnJoinSessionSuccess);
 
+    // Ensure we have left any session
+    GetMyGameSubsystem()->DestroySession();
+    
     // Initiate search
     MyGameInstanceSubsystem->FindSessions(10, true);
 }

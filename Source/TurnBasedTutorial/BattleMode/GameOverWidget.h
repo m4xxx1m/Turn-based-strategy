@@ -19,7 +19,7 @@ public:
     UFUNCTION(Client, Reliable)
     void SetWidgetText(bool HasWon);
 
-    UFUNCTION(Client, Reliable)
+    UFUNCTION()
     void QuitCurrentSession();
 
 protected:

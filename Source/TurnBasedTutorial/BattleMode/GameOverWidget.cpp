@@ -11,7 +11,7 @@ void UGameOverWidget::NativeConstruct() {
     ButtonToMenu->OnClicked.AddDynamic(this, &ThisClass::QuitCurrentSession);
 }
 
-void UGameOverWidget::QuitCurrentSession_Implementation() {
+void UGameOverWidget::QuitCurrentSession() {
     const UGameInstance *GameInstance = UGameplayStatics::GetGameInstance(
         GetWorld());
     USessionsGameInstanceSubsystem *GameInstanceSubsystem = GameInstance->GetSubsystem
