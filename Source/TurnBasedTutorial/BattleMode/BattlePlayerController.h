@@ -50,6 +50,9 @@ public:
     // UFUNCTION(Client, Reliable)
     // void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
 
+    UFUNCTION(Client, Reliable)
+    void StartPlayingMusic(USoundBase *BackgroundSound) const;
+
 private:
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> WidgetClass;

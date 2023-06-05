@@ -147,6 +147,11 @@ uint8 ABattlePlayerController::GetPlayerIndex() const {
     return PlayerIndex;
 }
 
+void ABattlePlayerController::StartPlayingMusic_Implementation(
+    USoundBase *BackgroundSound) const {
+    UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound);
+}
+
 // float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {
 //     return GetMyPlayerState()->SetCurrentActionAndReturnRadius(action);
 //

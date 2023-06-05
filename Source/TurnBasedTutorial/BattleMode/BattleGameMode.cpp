@@ -19,6 +19,7 @@ ABattleGameMode::ABattleGameMode()
 
 void ABattleGameMode::BeginPlay() {
     Super::BeginPlay();
+    // UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound);
 }
 
 auto ABattleGameMode::GetMyGameState() const {
@@ -137,6 +138,8 @@ void ABattleGameMode::PostLogin(APlayerController *NewPlayer) {
     // 0-indexation
     Cast<ABattlePlayerController>(NewPlayer)->SetPlayerIndex(
         CurrentNumberOfPlayers - 1);
+    Cast<ABattlePlayerController>(NewPlayer)->
+        StartPlayingMusic(BackgroundSound);
     UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
     if (CurrentNumberOfPlayers == 2) {
         UE_LOG(LogTemp, Warning, TEXT("Game Start"));

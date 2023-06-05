@@ -2,6 +2,7 @@
 
 #include "SinglePlayerGM.h"
 #include "SinglePlayerGS.h"
+#include "TurnBasedTutorial/BattleMode/BattlePlayerController.h"
 
 ASinglePlayerGM::ASinglePlayerGM()
     : Super() {
@@ -18,4 +19,6 @@ void ASinglePlayerGM::BeginPlay() {
 
 void ASinglePlayerGM::PostLogin(APlayerController *NewPlayer) {
     AGameMode::PostLogin(NewPlayer);
+    Cast<ABattlePlayerController>(NewPlayer)->
+        StartPlayingMusic(BackgroundSound);
 }

@@ -27,6 +27,9 @@ public:
     // void CycleTurns();
 
 protected:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    USoundBase *BackgroundSound;
+    
     UPROPERTY()
     TArray<UClass *> LoadedBpAssets;
 

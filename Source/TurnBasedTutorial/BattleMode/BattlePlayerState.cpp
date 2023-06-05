@@ -61,7 +61,7 @@ void ABattlePlayerState::SetEnemySelection_Implementation(
 }
 
 void ABattlePlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
-                                                FVector Location) {
+                                                    FVector Location) {
     Location.Z = 0.0f;
     if (Trooper->CheckMoveCorrectness(Location)) {
         Trooper->MoveTrooper(Location);
@@ -87,8 +87,8 @@ void ABattlePlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
 // }
 
 void ABattlePlayerState::Attack_Implementation(ATrooper *Attacker,
-                                           FVector Location,
-                                           int ActionIndex) {
+                                               FVector Location,
+                                               int ActionIndex) {
     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
         Attacker->Attack(ActionIndex, Location);
         // for (const auto Trooper : Troopers) {
@@ -156,8 +156,9 @@ void ABattlePlayerState::OnPlayerAction(const FHitResult &HitResult) {
         return;
     }
 
-    if (NewlySelectedTrooper == nullptr || !NewlySelectedTrooper->
-        IsValidLowLevel() || NewlySelectedTrooper->GetPlayerIndex() !=
+    if (HitResult.GetActor()->ActorHasTag(FName("Floor")) ||
+        NewlySelectedTrooper != nullptr &&
+        NewlySelectedTrooper->GetPlayerIndex() !=
         PlayerIndex) {
         if (SelectedTrooper != nullptr && SelectedTrooper->
             IsValidLowLevel()) {
