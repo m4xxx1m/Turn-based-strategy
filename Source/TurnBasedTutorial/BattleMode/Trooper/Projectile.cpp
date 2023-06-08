@@ -42,8 +42,8 @@ AProjectile::AProjectile() {
 }
 
 void AProjectile::Initialize(const UAbility *Ability,
-                               uint8 playerIndex,
-                               float PathLength) {
+                             uint8 playerIndex,
+                             float PathLength) {
     ProjectileMovementComponent->InitialSpeed =
         ProjectileMovementComponent->MaxSpeed = Ability->Speed;
     Damage = Ability->Damage;
@@ -69,9 +69,16 @@ void AProjectile::NotifyActorBeginOverlap(AActor *OtherActor) {
                ),
                OtherTrooper->GetId(), OtherTrooper->GetPlayerIndex(), Damage,
                PlayerIndex);
-        if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
-            GetPlayerIndex()) {
-            OtherTrooper->TrooperTakeDamage(Damage);
+        if (Damage > 0) {
+            if (PlayerIndex != -1 && PlayerIndex != OtherTrooper->
+                GetPlayerIndex()) {
+                OtherTrooper->TrooperTakeDamage(Damage);
+            }
+        } else {
+            if (PlayerIndex != -1 && PlayerIndex == OtherTrooper->
+                GetPlayerIndex()) {
+                OtherTrooper->TrooperTakeDamage(Damage);
+            }
         }
     } else {
         UE_LOG(LogTemp, Warning, TEXT("Overlapped not a trooper"));

@@ -308,15 +308,20 @@ void ATrooper::TrooperTakeDamage_Implementation(float Damage) {
     if (bIsTakingDamage || bIsDead) {
         return;
     }
-    HitPoints = FMath::Max<float>(0, HitPoints - Damage);
-    if (HitPoints == 0) {
-        bIsDead = true;
-        SetLifeSpan(DyingAnimationDuration);
-        GetWorld()->GetGameState<ABattleGameState>()->DecreaseLivingTroopers(
-            PlayerIndex);
+    if (Damage > 0) {
+        HitPoints = FMath::Max<float>(0, HitPoints - Damage);
+        if (HitPoints == 0) {
+            bIsDead = true;
+            SetLifeSpan(DyingAnimationDuration);
+            GetWorld()->GetGameState<ABattleGameState>()->
+                        DecreaseLivingTroopers(
+                            PlayerIndex);
+        } else {
+            // bIsTakingDamage = true;
+            SetIsTakingDamage(true);
+        }
     } else {
-        // bIsTakingDamage = true;
-        SetIsTakingDamage(true);
+        HitPoints = FMath::Min<float>(StartHitPoints, HitPoints - Damage);
     }
 }
 
