@@ -26,7 +26,7 @@ protected:
     void OnHostOnlineGameButtonClicked();
 
     UFUNCTION()
-    void StartSessionWhenCreatingSessonComplete(bool bSuccess);
+    void StartSessionWhenCreatingSessionComplete(bool bSuccess);
 
 private:
     USessionsGameInstanceSubsystem *GetMyGameSubsystem() const;

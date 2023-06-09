@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BattleUI.h"
 #include "GameFramework/PlayerController.h"
 #include "BattlePlayerController.generated.h"
 
@@ -53,7 +54,16 @@ public:
     UFUNCTION(Client, Reliable)
     void StartPlayingMusic(USoundBase *BackgroundSound) const;
 
+    UFUNCTION(Client, Reliable)
+    void SetWidgetTurn(bool bIsMyTurn);
+
 private:
+    UFUNCTION(Client, Reliable)
+    void CreateBattleWidget();
+    
+    UPROPERTY()
+    UBattleUI *BattleWidget;
+    
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> WidgetClass;
 

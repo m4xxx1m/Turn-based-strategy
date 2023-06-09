@@ -4,6 +4,7 @@
 
 #include "Trooper/Trooper.h"
 #include "CoreMinimal.h"
+#include "BattlePlayerController.h"
 #include "GameFramework/PlayerState.h"
 #include "BattlePlayerState.generated.h"
 
@@ -58,8 +59,14 @@ public:
 
     UFUNCTION(Client, Reliable)
     void GameOver(int PlayerLoseIndex);
+    
+    // UFUNCTION(Client, Reliable)
+    // void SetBattleWidget(UBattleUI *BattleWidget);
 
 protected:
+    // UPROPERTY()
+    // UBattleUI *BattleUI;
+    
     UPROPERTY(EditAnywhere, BlueprintReadWrite)
     TSubclassOf<UUserWidget> GameOverWidgetClass;
 

@@ -17,9 +17,7 @@ ABattlePlayerController::ABattlePlayerController()
 
 void ABattlePlayerController::BeginPlay() {
     Super::BeginPlay();
-    UUserWidget *CreatedWidget = CreateWidget<UUserWidget>(
-        GetWorld(), WidgetClass);
-    CreatedWidget->AddToViewport();
+    CreateBattleWidget();
 }
 
 void ABattlePlayerController::SetupInputComponent() {
@@ -64,8 +62,9 @@ void ABattlePlayerController::EndTurn_Implementation() {
     //     GetMyGameState()->CycleTurns();
     // }
     // GetMyPlayerState()->CycleTurns();
-    if (GetMyGameState()->IsInTurn(PlayerIndex))
+    if (GetMyGameState()->IsInTurn(PlayerIndex)) {
         GetMyGameState()->CycleTurns();
+    }
 }
 
 // void AMyPlayerController::EndTurn_Implementation() {
@@ -145,6 +144,20 @@ void ABattlePlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
 
 uint8 ABattlePlayerController::GetPlayerIndex() const {
     return PlayerIndex;
+}
+
+void ABattlePlayerController::CreateBattleWidget_Implementation() {
+    BattleWidget = CreateWidget<UBattleUI>(
+        GetWorld(), WidgetClass);
+    BattleWidget->AddToViewport();
+    // GetPlayerState<ABattlePlayerState>()->SetBattleWidget(BattleWidget);
+    
+}
+
+void ABattlePlayerController::SetWidgetTurn_Implementation(bool bIsMyTurn) {
+    if (BattleWidget) {
+        BattleWidget->SetWhoseTurnText(bIsMyTurn);
+    }
 }
 
 void ABattlePlayerController::StartPlayingMusic_Implementation(

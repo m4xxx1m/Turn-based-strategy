@@ -17,8 +17,8 @@ class TURNBASEDTUTORIAL_API USessionListWidget : public UUserWidget {
 protected:
     virtual void NativeConstruct() override;
 
-    UPROPERTY(meta = (BindWidget))
-    class UButton *ConnectToSelectedSessionButton;
+    // UPROPERTY(meta = (BindWidget))
+    // class UButton *ConnectToSelectedSessionButton;
 
     UPROPERTY(meta = (BindWidget))
     class UButton *GoBackToMainMenuButton;
@@ -43,6 +43,6 @@ private:
     UFUNCTION()
     void OnRefreshListButtonClicked();
 
-    UFUNCTION()
-    void ConnectToFirstSession();
+    // UFUNCTION()
+    // void ConnectToFirstSession();
 };

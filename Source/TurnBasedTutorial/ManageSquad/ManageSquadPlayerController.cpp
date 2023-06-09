@@ -3,6 +3,7 @@
 #include "ManageSquadPlayerController.h"
 
 #include "ManageSquadGameState.h"
+#include "ManageSquadWidget.h"
 
 AManageSquadPlayerController::AManageSquadPlayerController() {
     SetShowMouseCursor(true);
@@ -12,6 +13,19 @@ void AManageSquadPlayerController::SetupInputComponent() {
     Super::SetupInputComponent();
     InputComponent->BindAction("MyAction", IE_Pressed, this,
                                &AManageSquadPlayerController::OnLeftMouseClick);
+}
+
+void AManageSquadPlayerController::BeginPlay() {
+    Super::BeginPlay();
+    const TSoftClassPtr<UUserWidget> WidgetClass = TSoftClassPtr<
+        UUserWidget>(FSoftObjectPath(
+        "WidgetBlueprint'/Game/ManageSquadMenu/BP_ManageSquadWidget.BP_ManageSquadWidget_C'"
+    ));
+    UUserWidget *CreatedWidget = CreateWidget<UUserWidget>(
+        GetWorld(), WidgetClass.LoadSynchronous());
+    if (CreatedWidget) {
+        CreatedWidget->AddToViewport();
+    }
 }
 
 void AManageSquadPlayerController::OnLeftMouseClick() {

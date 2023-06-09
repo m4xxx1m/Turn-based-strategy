@@ -4,10 +4,18 @@
 #include "SessionListEntryWidget.h"
 #include "OnlineSessionSettings.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Kismet/GameplayStatics.h"
+
+void USessionListEntryWidget::NativeConstruct() {
+    Super::NativeConstruct();
+    JoinSessionButton->OnClicked.AddDynamic(
+        this, &ThisClass::OnJoinButton);
+}
 
 void USessionListEntryWidget::Update(int SessionIndex,
-                                       const FOnlineSessionSearchResult &
-                                       Session) {
+                                     const FOnlineSessionSearchResult &
+                                     Session) {
     SessionId = SessionIndex;
     IndexText->SetText(FText::AsNumber(SessionIndex + 1));
 
@@ -21,4 +29,17 @@ void USessionListEntryWidget::Update(int SessionIndex,
 
     PlayersCountText->SetText(FText::AsNumber(CurPlayerCount));
     PingText->SetText(FText::AsNumber(Session.PingInMs));
+}
+
+void USessionListEntryWidget::OnJoinButton() {
+    GetMyGameSubsystem()->JoinSession(SessionId);
+}
+
+USessionsGameInstanceSubsystem *
+USessionListEntryWidget::GetMyGameSubsystem() const {
+    const UGameInstance *GameInstance = UGameplayStatics::GetGameInstance(
+        GetWorld());
+    USessionsGameInstanceSubsystem *GameInstanceSubsystem = GameInstance->
+        GetSubsystem<USessionsGameInstanceSubsystem>();
+    return GameInstanceSubsystem;
 }

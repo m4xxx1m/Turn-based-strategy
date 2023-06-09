@@ -39,6 +39,11 @@ void ABattlePlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
 
+// void ABattlePlayerState::
+// SetBattleWidget_Implementation(UBattleUI *BattleWidget) {
+//     BattleUI = BattleWidget;
+// }
+
 void ABattlePlayerState::GameOver_Implementation(int PlayerLoseIndex) {
     UGameOverWidget *CreatedWidget = CreateWidget<UGameOverWidget>(
         GetWorld(), GameOverWidgetClass);
@@ -116,12 +121,14 @@ bool ABattlePlayerState::IsMyTurn() const {
 
 void ABattlePlayerState::SetMyTurn(bool bMyTurn) {
     bIsMyTurn = bMyTurn;
-    if (bIsMyTurn) {
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
-                                         FString::Printf(
-                                             TEXT("CURRENT TURN: %d"),
-                                             PlayerIndex));
-    }
+    Cast<ABattlePlayerController>(GetWorld()->GetFirstPlayerController())->
+        SetWidgetTurn(bIsMyTurn);
+    // if (bIsMyTurn) {
+    //     GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+    //                                      FString::Printf(
+    //                                          TEXT("CURRENT TURN: %d"),
+    //                                          PlayerIndex));
+    // }
 }
 
 void ABattlePlayerState::StartTurn_Implementation() {
@@ -139,6 +146,7 @@ void ABattlePlayerState::EndTurn_Implementation() {
             SelectedTrooper = nullptr;
         }
         UE_LOG(LogTemp, Warning, TEXT("Not your turn, %d"), PlayerIndex);
+
         // AMyGameMode *gameMode = GetMyGameMode();
         // gameMode->CycleTurns();
         // Cast<AMyGameState>(GetWorld()->GetGameState())->CycleTurns();

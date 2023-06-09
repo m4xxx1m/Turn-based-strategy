@@ -13,8 +13,8 @@ void USessionListWidget::NativeConstruct() {
 
     RefreshListButton->OnClicked.AddDynamic(
         this, &ThisClass::OnRefreshListButtonClicked);
-    ConnectToSelectedSessionButton->OnClicked.AddDynamic(
-        this, &ThisClass::ConnectToFirstSession);
+    // ConnectToSelectedSessionButton->OnClicked.AddDynamic(
+    //     this, &ThisClass::ConnectToFirstSession);
 
     const auto MyGameInstanceSubsystem = GetMyGameSubsystem();
     MyGameInstanceSubsystem->OnFindSessionsCompleteEvent.AddUObject(
@@ -54,9 +54,9 @@ void USessionListWidget::OnRefreshListButtonClicked() {
     GetMyGameSubsystem()->FindSessions(10, true);
 }
 
-void USessionListWidget::ConnectToFirstSession() {
-    GetMyGameSubsystem()->JoinSession(0);
-}
+// void USessionListWidget::ConnectToFirstSession() {
+    // GetMyGameSubsystem()->JoinSession(0);
+// }
 
 
 void USessionListWidget::OnJoinSessionSuccess(

@@ -12,18 +12,19 @@ void UMainMenuWidget::NativeConstruct() {
         this, &ThisClass::UMainMenuWidget::OnHostOnlineGameButtonClicked);
 
     GetMyGameSubsystem()->OnCreateSessionCompleteEvent.AddDynamic(
-        this, &ThisClass::StartSessionWhenCreatingSessonComplete);
+        this, &ThisClass::StartSessionWhenCreatingSessionComplete);
 }
 
 void UMainMenuWidget::OnHostOnlineGameButtonClicked() {
     // Ensure we have left any session
     GetMyGameSubsystem()->DestroySession();
-    
-    GetMyGameSubsystem()->CreateSession(
-        "Lobby " + FString::FromInt(FMath::RandRange(1, 1e6)), 2, true);
+
+    const FString SessionName = "Lobby " + FString::FromInt(
+                                    FMath::RandRange(1, 1e6));
+    GetMyGameSubsystem()->CreateSession(SessionName, 2, true);
 }
 
-void UMainMenuWidget::StartSessionWhenCreatingSessonComplete(bool bSuccess) {
+void UMainMenuWidget::StartSessionWhenCreatingSessionComplete(bool bSuccess) {
     if (!bSuccess) {
         return;
     }
