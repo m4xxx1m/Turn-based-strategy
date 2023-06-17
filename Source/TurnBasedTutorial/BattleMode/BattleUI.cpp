@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "BattleUI.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
-#include "BattleUI.h"
 #include "BattlePlayerController.h"
 #include "BattlePlayerState.h"
 
