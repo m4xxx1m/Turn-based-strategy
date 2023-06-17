@@ -10,13 +10,12 @@
  * 
  */
 UCLASS()
-class TURNBASEDTUTORIAL_API USelectedTrooperSaveGame : public USaveGame
-{
-	GENERATED_BODY()
+class TURNBASEDTUTORIAL_API USelectedTrooperSaveGame : public USaveGame {
+    GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere, Category=Basic)
-	TArray<uint8> SelectedTroopers;
+    UPROPERTY(EditAnywhere, Category=Basic)
+    TArray<uint8> SelectedTroopers;
 
-	USelectedTrooperSaveGame();
+    USelectedTrooperSaveGame();
 };

@@ -3,8 +3,6 @@
 
 #include "SelectedTrooperSaveGame.h"
 
-USelectedTrooperSaveGame::USelectedTrooperSaveGame(): Super()
-{
-	
+USelectedTrooperSaveGame::USelectedTrooperSaveGame()
+    : Super() {
 }
-

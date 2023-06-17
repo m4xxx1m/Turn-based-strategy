@@ -29,3 +29,8 @@ ETrooperType AManageSquadTrooper::GetType() const {
 int AManageSquadTrooper::GetIndex() const {
     return Index;
 }
+
+void AManageSquadTrooper::Initialize(int TrooperIndex) {
+    Index = TrooperIndex;
+    Type = ETrooperType::TROOPER_IN_SQUAD;
+}

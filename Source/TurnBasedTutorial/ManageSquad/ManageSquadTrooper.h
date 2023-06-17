@@ -40,4 +40,7 @@ public:
 
     UFUNCTION()
     int GetIndex() const;
+
+    UFUNCTION()
+    void Initialize(int TrooperIndex);
 };
