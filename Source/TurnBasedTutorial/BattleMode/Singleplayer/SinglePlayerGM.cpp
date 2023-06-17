@@ -13,12 +13,12 @@ ASinglePlayerGM::ASinglePlayerGM()
 void ASinglePlayerGM::BeginPlay() {
     Super::BeginPlay();
     UE_LOG(LogTemp, Warning, TEXT("SinglePlayer GameMode BeginPlay"));
-    GameStateClass = ASinglePlayerGS::StaticClass();
-    StartGame();
+    // GameStateClass = ASinglePlayerGS::StaticClass();
+    // StartGame();
 }
 
-void ASinglePlayerGM::PostLogin(APlayerController *NewPlayer) {
-    AGameMode::PostLogin(NewPlayer);
-    Cast<ABattlePlayerController>(NewPlayer)->
-        StartPlayingMusic(BackgroundSound);
-}
+// void ASinglePlayerGM::PostLogin(APlayerController *NewPlayer) {
+//     AGameMode::PostLogin(NewPlayer);
+//     Cast<ABattlePlayerController>(NewPlayer)->
+//         StartPlayingMusic(BackgroundSound);
+// }

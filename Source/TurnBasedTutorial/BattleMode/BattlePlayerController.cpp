@@ -7,12 +7,22 @@
 #include "BattlePlayerState.h"
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "TurnBasedTutorial/ManageSquad/SelectedTrooperSaveGame.h"
 
 ABattlePlayerController::ABattlePlayerController()
     : Super()/*, bIsMyTurn(false), SelectedTrooper(nullptr)*/ {
     UE_LOG(LogTemp, Warning, TEXT("Player controller created"));
     SetShowMouseCursor(true);
     PlayerIndex = 0;
+
+    if (UGameplayStatics::DoesSaveGameExist("Selected troopers", 0)) {
+        const USelectedTrooperSaveGame *SaveGameInstance = Cast<
+            USelectedTrooperSaveGame>(
+            UGameplayStatics::LoadGameFromSlot(TEXT("Selected troopers"), 0));
+        TrooperKinds = SaveGameInstance->SelectedTroopers;
+    } else {
+        TrooperKinds = {0, 0, 0, 0, 0};
+    }
 }
 
 void ABattlePlayerController::BeginPlay() {

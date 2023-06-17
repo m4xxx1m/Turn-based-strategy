@@ -36,6 +36,12 @@ protected:
     UPROPERTY()
     bool bIsMultiplayer = true;
 
+    UPROPERTY()
+    TArray<uint8> FirstPlayerTrooperKinds;
+
+    UPROPERTY()
+    TArray<uint8> SecondPlayerTrooperKinds;
+
     void InitializeSpawnPointsIfNeeded(AController *Player);
 
     UFUNCTION(Server, Reliable)

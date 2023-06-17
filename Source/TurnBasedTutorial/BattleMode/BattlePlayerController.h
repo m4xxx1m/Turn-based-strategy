@@ -57,6 +57,9 @@ public:
     UFUNCTION(Client, Reliable)
     void SetWidgetTurn(bool bIsMyTurn);
 
+    UPROPERTY()
+    TArray<uint8> TrooperKinds;
+
 private:
     UFUNCTION(Client, Reliable)
     void CreateBattleWidget();
