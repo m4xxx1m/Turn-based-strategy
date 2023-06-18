@@ -172,7 +172,7 @@ void ABattlePlayerController::SetWidgetTurn_Implementation(bool bIsMyTurn) {
 
 void ABattlePlayerController::StartPlayingMusic_Implementation(
     USoundBase *BackgroundSound) const {
-    UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound);
+    UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound, 0.25f);
 }
 
 // float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {
