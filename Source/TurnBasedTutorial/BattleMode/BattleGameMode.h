@@ -27,11 +27,20 @@ public:
     // void CycleTurns();
 
 protected:
+    UPROPERTY(BlueprintReadWrite, EditAnywhere)
+    USoundBase *BackgroundSound;
+    
     UPROPERTY()
     TArray<UClass *> LoadedBpAssets;
 
     UPROPERTY()
     bool bIsMultiplayer = true;
+
+    UPROPERTY()
+    TArray<uint8> FirstPlayerTrooperKinds;
+
+    UPROPERTY()
+    TArray<uint8> SecondPlayerTrooperKinds;
 
     void InitializeSpawnPointsIfNeeded(AController *Player);
 

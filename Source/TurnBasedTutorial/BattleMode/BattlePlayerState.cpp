@@ -39,6 +39,11 @@ void ABattlePlayerState::SetPlayerIndex(uint8 NewPlayerIndex) {
     PlayerIndex = NewPlayerIndex;
 }
 
+// void ABattlePlayerState::
+// SetBattleWidget_Implementation(UBattleUI *BattleWidget) {
+//     BattleUI = BattleWidget;
+// }
+
 void ABattlePlayerState::GameOver_Implementation(int PlayerLoseIndex) {
     UGameOverWidget *CreatedWidget = CreateWidget<UGameOverWidget>(
         GetWorld(), GameOverWidgetClass);
@@ -61,7 +66,7 @@ void ABattlePlayerState::SetEnemySelection_Implementation(
 }
 
 void ABattlePlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
-                                                FVector Location) {
+                                                    FVector Location) {
     Location.Z = 0.0f;
     if (Trooper->CheckMoveCorrectness(Location)) {
         Trooper->MoveTrooper(Location);
@@ -87,8 +92,8 @@ void ABattlePlayerState::MoveTrooper_Implementation(ATrooper *Trooper,
 // }
 
 void ABattlePlayerState::Attack_Implementation(ATrooper *Attacker,
-                                           FVector Location,
-                                           int ActionIndex) {
+                                               FVector Location,
+                                               int ActionIndex) {
     if (Attacker->CheckAttackCorrectness(Location, ActionIndex)) {
         Attacker->Attack(ActionIndex, Location);
         // for (const auto Trooper : Troopers) {
@@ -116,12 +121,14 @@ bool ABattlePlayerState::IsMyTurn() const {
 
 void ABattlePlayerState::SetMyTurn(bool bMyTurn) {
     bIsMyTurn = bMyTurn;
-    if (bIsMyTurn) {
-        GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
-                                         FString::Printf(
-                                             TEXT("CURRENT TURN: %d"),
-                                             PlayerIndex));
-    }
+    Cast<ABattlePlayerController>(GetWorld()->GetFirstPlayerController())->
+        SetWidgetTurn(bIsMyTurn);
+    // if (bIsMyTurn) {
+    //     GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Green,
+    //                                      FString::Printf(
+    //                                          TEXT("CURRENT TURN: %d"),
+    //                                          PlayerIndex));
+    // }
 }
 
 void ABattlePlayerState::StartTurn_Implementation() {
@@ -139,6 +146,7 @@ void ABattlePlayerState::EndTurn_Implementation() {
             SelectedTrooper = nullptr;
         }
         UE_LOG(LogTemp, Warning, TEXT("Not your turn, %d"), PlayerIndex);
+
         // AMyGameMode *gameMode = GetMyGameMode();
         // gameMode->CycleTurns();
         // Cast<AMyGameState>(GetWorld()->GetGameState())->CycleTurns();
@@ -156,8 +164,9 @@ void ABattlePlayerState::OnPlayerAction(const FHitResult &HitResult) {
         return;
     }
 
-    if (NewlySelectedTrooper == nullptr || !NewlySelectedTrooper->
-        IsValidLowLevel() || NewlySelectedTrooper->GetPlayerIndex() !=
+    if (HitResult.GetActor()->ActorHasTag(FName("Floor")) ||
+        NewlySelectedTrooper != nullptr &&
+        NewlySelectedTrooper->GetPlayerIndex() !=
         PlayerIndex) {
         if (SelectedTrooper != nullptr && SelectedTrooper->
             IsValidLowLevel()) {

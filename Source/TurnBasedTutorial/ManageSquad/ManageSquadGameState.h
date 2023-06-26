@@ -14,12 +14,21 @@ class TURNBASEDTUTORIAL_API AManageSquadGameState : public AGameState {
     GENERATED_BODY()
 
 public:
-    AManageSquadGameState();
+    virtual void BeginPlay() override;
 
     UFUNCTION()
     void ChangeSquad(int TrooperIndex, int TrooperKind);
 
-private:
+    UFUNCTION()
+    TArray<uint8> GetSquad() const;
+
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    TArray<UClass *> TroopersBpAssets;
+
+    UFUNCTION()
+    void InitializeTroopers() const;
+    
     UPROPERTY()
-    TArray<int> TroopersKinds;
+    TArray<uint8> TroopersKinds;
 };

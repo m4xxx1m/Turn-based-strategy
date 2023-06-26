@@ -2,6 +2,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BattleUI.h"
 #include "GameFramework/PlayerController.h"
 #include "BattlePlayerController.generated.h"
 
@@ -50,7 +51,22 @@ public:
     // UFUNCTION(Client, Reliable)
     // void SetEnemySelection(const TArray<ATrooper *> &Troopers) const;
 
+    UFUNCTION(Client, Reliable)
+    void StartPlayingMusic(USoundBase *BackgroundSound) const;
+
+    UFUNCTION(Client, Reliable)
+    void SetWidgetTurn(bool bIsMyTurn);
+
+    UPROPERTY()
+    TArray<uint8> TrooperKinds;
+
 private:
+    UFUNCTION(Client, Reliable)
+    void CreateBattleWidget();
+    
+    UPROPERTY()
+    UBattleUI *BattleWidget;
+    
     UPROPERTY(EditAnywhere)
     TSubclassOf<UUserWidget> WidgetClass;
 

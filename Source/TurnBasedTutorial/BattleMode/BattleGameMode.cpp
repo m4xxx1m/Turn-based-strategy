@@ -19,6 +19,7 @@ ABattleGameMode::ABattleGameMode()
 
 void ABattleGameMode::BeginPlay() {
     Super::BeginPlay();
+    // UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound);
 }
 
 auto ABattleGameMode::GetMyGameState() const {
@@ -34,10 +35,10 @@ void ABattleGameMode::InitializeBattleField_Implementation() {
     uint8 TrooperCount = 0;
 
     TArray<const TCHAR *> bpPaths{
+        TEXT("Blueprint'/Game/Troopers/TrooperWizard.TrooperWizard_C'"),
         TEXT(
             "Blueprint'/Game/Troopers/TrooperSkeletonMelee.TrooperSkeletonMelee_C'"
-        ),
-        TEXT("Blueprint'/Game/Troopers/TrooperWizard.TrooperWizard_C'")
+        )
     };
     // TArray<UClass *> LoadedBpAssets;
     for (int i = 0; i < bpPaths.Num(); ++i) {
@@ -51,7 +52,7 @@ void ABattleGameMode::InitializeBattleField_Implementation() {
         FTransform SpawnLocationAndRotation(Rotation);
         SpawnLocationAndRotation.SetLocation(Location);
         AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
-            LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+            LoadedBpAssets[FirstPlayerTrooperKinds[i]], SpawnLocationAndRotation);
         // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
         //     ATrooper::StaticClass(), SpawnLocationAndRotation);
         Cast<ATrooper>(Spawned)->Initialize(
@@ -68,7 +69,7 @@ void ABattleGameMode::InitializeBattleField_Implementation() {
             FTransform SpawnLocationAndRotation(Rotation);
             SpawnLocationAndRotation.SetLocation(Location);
             AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
-                LoadedBpAssets[i % 2], SpawnLocationAndRotation);
+                LoadedBpAssets[SecondPlayerTrooperKinds[i]], SpawnLocationAndRotation);
             // AActor *Spawned = GetWorld()->SpawnActorDeferred<ATrooper>(
             //     ATrooper::StaticClass(), SpawnLocationAndRotation);
             Cast<ATrooper>(Spawned)->Initialize(
@@ -78,11 +79,6 @@ void ABattleGameMode::InitializeBattleField_Implementation() {
             GetMyGameState()->AddTrooper(Cast<ATrooper>(Spawned));
             Location += {0.f, 500.f, 0.0f};
         }
-    } else {
-        // Cast<ASinglePlayerGS>(GetMyGameState())->GetEnemyAIController()->
-        // SetTrooperAssetsAndSpawn(
-        // LoadedBpAssets,
-        // TrooperCount);
     }
 }
 
@@ -137,8 +133,19 @@ void ABattleGameMode::PostLogin(APlayerController *NewPlayer) {
     // 0-indexation
     Cast<ABattlePlayerController>(NewPlayer)->SetPlayerIndex(
         CurrentNumberOfPlayers - 1);
+    Cast<ABattlePlayerController>(NewPlayer)->
+        StartPlayingMusic(BackgroundSound);
+
+    if (CurrentNumberOfPlayers == 1)
+    {
+        FirstPlayerTrooperKinds = Cast<ABattlePlayerController>(NewPlayer)->TrooperKinds;
+    } else if (CurrentNumberOfPlayers == 2)
+    {
+        SecondPlayerTrooperKinds = Cast<ABattlePlayerController>(NewPlayer)->TrooperKinds;
+    }
+    
     UE_LOG(LogTemp, Warning, TEXT("%d"), CurrentNumberOfPlayers);
-    if (CurrentNumberOfPlayers == 2) {
+    if (!bIsMultiplayer || CurrentNumberOfPlayers == 2) {
         UE_LOG(LogTemp, Warning, TEXT("Game Start"));
         // start the game
         // dynamic_cast<AMyGameState *>(

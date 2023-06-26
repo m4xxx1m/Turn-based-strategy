@@ -7,19 +7,27 @@
 #include "BattlePlayerState.h"
 #include "Blueprint/UserWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "TurnBasedTutorial/ManageSquad/SelectedTrooperSaveGame.h"
 
 ABattlePlayerController::ABattlePlayerController()
     : Super()/*, bIsMyTurn(false), SelectedTrooper(nullptr)*/ {
     UE_LOG(LogTemp, Warning, TEXT("Player controller created"));
     SetShowMouseCursor(true);
     PlayerIndex = 0;
+
+    if (UGameplayStatics::DoesSaveGameExist("Selected troopers", 0)) {
+        const USelectedTrooperSaveGame *SaveGameInstance = Cast<
+            USelectedTrooperSaveGame>(
+            UGameplayStatics::LoadGameFromSlot(TEXT("Selected troopers"), 0));
+        TrooperKinds = SaveGameInstance->SelectedTroopers;
+    } else {
+        TrooperKinds = {0, 0, 0, 0, 0};
+    }
 }
 
 void ABattlePlayerController::BeginPlay() {
     Super::BeginPlay();
-    UUserWidget *CreatedWidget = CreateWidget<UUserWidget>(
-        GetWorld(), WidgetClass);
-    CreatedWidget->AddToViewport();
+    CreateBattleWidget();
 }
 
 void ABattlePlayerController::SetupInputComponent() {
@@ -64,8 +72,9 @@ void ABattlePlayerController::EndTurn_Implementation() {
     //     GetMyGameState()->CycleTurns();
     // }
     // GetMyPlayerState()->CycleTurns();
-    if (GetMyGameState()->IsInTurn(PlayerIndex))
+    if (GetMyGameState()->IsInTurn(PlayerIndex)) {
         GetMyGameState()->CycleTurns();
+    }
 }
 
 // void AMyPlayerController::EndTurn_Implementation() {
@@ -145,6 +154,25 @@ void ABattlePlayerController::SetPlayerIndex(uint8 NewPlayerIndex) {
 
 uint8 ABattlePlayerController::GetPlayerIndex() const {
     return PlayerIndex;
+}
+
+void ABattlePlayerController::CreateBattleWidget_Implementation() {
+    BattleWidget = CreateWidget<UBattleUI>(
+        GetWorld(), WidgetClass);
+    BattleWidget->AddToViewport();
+    // GetPlayerState<ABattlePlayerState>()->SetBattleWidget(BattleWidget);
+    
+}
+
+void ABattlePlayerController::SetWidgetTurn_Implementation(bool bIsMyTurn) {
+    if (BattleWidget) {
+        BattleWidget->SetWhoseTurnText(bIsMyTurn);
+    }
+}
+
+void ABattlePlayerController::StartPlayingMusic_Implementation(
+    USoundBase *BackgroundSound) const {
+    UGameplayStatics::PlaySound2D(GetWorld(), BackgroundSound, 0.25f);
 }
 
 // float AMyPlayerController::SetCurrentActionAndReturnRadius(int action) {
